@@ -36,22 +36,27 @@
       "top_upah_sektor": [
         {
           "sektor": "Administrasi pemerintahan, pertahanan, dan jaminan sosial, Jasa pendidikan",
+          "label": "O",
           "upah": 3775556
         },
         {
           "sektor": "Jasa keuangan dan asuransi",
+          "label": "K",
           "upah": 3492126
         },
         {
           "sektor": "Pertambangan dan penggalian",
+          "label": "B",
           "upah": 3324573
         },
         {
           "sektor": "Jasa kesehatan dan kegiatan sosial",
+          "label": "Q",
           "upah": 3301399
         },
         {
           "sektor": "Pengadaan listrik dan gas",
+          "label": "D",
           "upah": 3107236
         }
       ],

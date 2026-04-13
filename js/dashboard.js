@@ -1,18 +1,28 @@
-// Formatter Mata Uang & Angka
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
 const formatNumber = (angka) => new Intl.NumberFormat('id-ID').format(angka);
+function initHeroSlider() {
+    const slides = document.querySelectorAll('.hero-slide');
+    let currentSlide = 0;
+    if (slides.length > 1) {
+        setInterval(() => {
+            slides[currentSlide].classList.remove('opacity-80');
+            slides[currentSlide].classList.add('opacity-0');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.remove('opacity-0');
+            slides[currentSlide].classList.add('opacity-80');
+        }, 5000); 
+    }
+}
+initHeroSlider();
 
-// Eksekusi Fetch Data saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Fetch JSON file (Ini akan jalan sempurna di GitHub Pages)
     fetch('data.json')
         .then(response => response.json())
         .then(data => {
             const overview = data.page1.overview;
             const charts = data.page1.chart;
 
-            // 1. UPDATE KARTU (CARDS)
             document.getElementById('val-usia-kerja').innerText = formatNumber(overview.penduduk_usia_kerja.jumlah);
             document.getElementById('val-usia-persen').innerText = `${overview.penduduk_usia_kerja.persentase}% dari total populasi`;
             
@@ -24,47 +34,116 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('bar-informal').style.width = overview.pekerjaan.informal + '%';
 
             document.getElementById('val-umur-kelompok').innerText = overview.kelompok_umur_terbesar.kelompok;
-            document.getElementById('val-umur-jumlah').innerText = `${formatNumber(overview.kelompok_umur_terbesar.jumlah)} jiwa`;
+            document.getElementById('val-umur-jumlah').innerText = `Sejumlah ${formatNumber(overview.kelompok_umur_terbesar.jumlah)} jiwa`;
 
-            // 2. RENDER CHARTS
             Chart.defaults.font.family = "'Poppins', sans-serif";
             Chart.defaults.color = '#64748b';
-
-            // Chart 1: Pie Pendidikan
-            new Chart(document.getElementById('chartPendidikan').getContext('2d'), {
+            Chart.register(ChartDataLabels);
+            
+            // Chart 1
+            const dataPengangguran = charts.pengangguran_pendidikan;
+            const dataBekerja = charts.bekerja_pendidikan;
+            const ctxPendidikan = document.getElementById('chartPendidikan').getContext('2d');
+            let chartPendidikanInstance = new Chart(ctxPendidikan, {
                 type: 'doughnut',
                 data: {
-                    labels: charts.pengangguran_pendidikan.labels,
+                    labels: ['Bekerja', 'Pengangguran'],
                     datasets: [{
-                        data: charts.pengangguran_pendidikan.jumlah,
-                        backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e'],
+                        data: [dataBekerja.persentase[0], dataPengangguran.persentase[0]],
+                        backgroundColor: ['#22c55e', '#ef4444'],
                         borderWidth: 0,
-                        hoverOffset: 4
+                        hoverBorderWidth: 0,
+                        hoverOffset: 6
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { 
+                    layout: { padding: 15 },
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'right' },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (value) => {
+                                return value + '%';
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    } 
+                }
             });
 
-            // Chart 2: Pie Komposisi Umur
+            document.getElementById('filterPendidikan').addEventListener('change', function(e) {
+                const index = parseInt(e.target.value);
+                chartPendidikanInstance.data.datasets[0].data = [
+                    dataBekerja.persentase[index], 
+                    dataPengangguran.persentase[index]
+                ];
+                
+                chartPendidikanInstance.update();
+            });
+
+            // Chart 2:
             new Chart(document.getElementById('chartUmur').getContext('2d'), {
                 type: 'pie',
                 data: {
                     labels: charts.komposisi_umur.labels,
                     datasets: [{
-                        data: charts.komposisi_umur.jumlah,
+                        data: charts.komposisi_umur.persentase, 
                         backgroundColor: ['#3b82f6', '#1F3C88', '#94a3b8'],
                         borderWidth: 0,
-                        hoverOffset: 4
+                        hoverBorderWidth: 0,
+                        hoverOffset: 6
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { 
+                    layout: { padding: 15 },
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'right' },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (value) => {
+                                return value + '%';
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    } 
+                }
             });
 
-            // Chart 3: Bar Top 5 Upah Sektor
+            // Chart 3
+            const keteranganContainer = document.getElementById('keteranganLabelUpah');
+            keteranganContainer.innerHTML = ''; 
+
+            charts.top_upah_sektor.forEach(item => {
+                keteranganContainer.innerHTML += `
+                    <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span class="font-bold text-white bg-[#1F3C88] w-8 h-8 flex items-center justify-center rounded-lg shrink-0">${item.label}</span>
+                        <span class="text-sm text-slate-600 font-medium leading-tight">${item.sektor}</span>
+                    </div>
+                `;
+            });
+
             new Chart(document.getElementById('chartTopUpah').getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: charts.top_upah_sektor.map(item => item.sektor),
+                    labels: charts.top_upah_sektor.map(item => item.label),
                     datasets: [{
                         label: 'Rata-rata Upah',
                         data: charts.top_upah_sektor.map(item => item.upah),
@@ -75,12 +154,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { tooltip: { callbacks: { label: (context) => formatRupiah(context.raw) } } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                    plugins: { 
+                        datalabels: { display: false },
+                        tooltip: { 
+                            callbacks: { 
+                                title: (context) => charts.top_upah_sektor[context[0].dataIndex].sektor,
+                                label: (context) => formatRupiah(context.raw) 
+                            } 
+                        } 
+                    },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { display: false } }, 
+                        x: { grid: { display: false } } 
+                    }
                 }
             });
 
-            // Chart 4: Bidirectional Bar Gender
+            // Chart 4
             new Chart(document.getElementById('chartGender').getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -99,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         y: { stacked: true, grid: { display: false }, ticks: { autoSkip: false } }
                     },
                     plugins: {
+                        datalabels: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {

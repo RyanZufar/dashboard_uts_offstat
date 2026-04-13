@@ -4,7 +4,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Menyembunyikan scrollbar untuk card horizontal tapi tetap bisa di-scroll dengan rapi */
 .hide-scrollbar::-webkit-scrollbar {
     display: none;
 }
