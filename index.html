@@ -1,66 +1,135 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Jateng</title>
-
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Jawa Tengah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-100">
+<body class="m-0 p-0 text-slate-800 relative">
 
-  <!-- HERO -->
-  <header class="hero">
-    <img src="assets/images/hero1.png" class="hero-img active" id="img1">
-    <img src="assets/images/hero2.png" class="hero-img" id="img2">
+    <nav class="absolute top-0 inset-x-0 px-6 md:px-12 py-6 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <span class="text-white font-bold text-2xl drop-shadow-md tracking-wide">
+                Jateng<span class="text-blue-400">Sight</span>
+            </span>
+        </div>
+        <div class="hidden md:flex items-center gap-2 font-medium text-white">
+            <a href="#" class="bg-white/20 backdrop-blur-md text-white px-5 py-2.5 rounded-full border border-white/10 shadow-sm">Overview</a>
+            <a href="#" class="px-5 py-2.5 rounded-full hover:bg-white/15 hover:backdrop-blur-sm transition">Data Kabupaten</a>
+        </div>
+    </nav>
 
-    <div class="overlay"></div>
+    <header class="relative w-full h-[550px] md:h-[650px] overflow-hidden bg-gray-900 z-0">
+        <img src="assets/images/hero.png" alt="Jawa Tengah" class="absolute inset-0 w-full h-full object-cover object-center opacity-80">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-[#1F3C88]/90 via-[#1F3C88]/50 to-black/40"></div>
 
-    <div class="hero-content">
-      <h1 class="text-4xl md:text-6xl font-bold">
-        Dashboard Ketenagakerjaan Jawa Tengah
-      </h1>
-      <p class="mt-3 text-lg">
-        Ringkasan statistik berdasarkan data terbaru
-      </p>
-    </div>
-  </header>
+        <div class="absolute inset-0 flex flex-col items-center justify-center z-10 px-4 text-center pb-20 pt-20">
+            <h1 class="text-4xl md:text-6xl font-bold text-white drop-shadow-xl leading-tight max-w-4xl">
+                Ringkasan Ketenagakerjaan<br>Provinsi Jawa Tengah
+            </h1>
+            <p class="text-blue-100 mt-4 text-lg max-w-2xl">
+                Overview demografi angkatan kerja, tingkat pengangguran, dan analisis upah di berbagai sektor.
+            </p>
+        </div>
+    </header>
 
-  <!-- CONTENT -->
-  <section class="container mx-auto px-6 py-10">
+    <section class="w-full bg-[#f8fafc] rounded-t-[3rem] -mt-24 relative z-10 px-6 md:px-12 py-14">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-[#1F3C88]">Data Ketenagakerjaan Provinsi</h2>
+                    <p class="text-slate-400 mt-1">Ringkasan statistik berdasarkan data terbaru.</p>
+                </div>
+            </div>
 
-    <!-- CARDS -->
-    <div id="cards" class="grid md:grid-cols-4 gap-6 mb-10"></div>
+            <div class="overflow-x-auto hide-scrollbar w-full pb-8">
+                <div class="flex gap-6 w-max">
+                    
+                    <div class="w-[320px] shrink-0 bg-[#1F3C88] text-white rounded-3xl p-8 shadow-xl hover:-translate-y-2 transition duration-300 relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 bg-white/10 w-32 h-32 rounded-full blur-3xl group-hover:bg-white/20 transition"></div>
+                        <h3 class="text-blue-200 font-medium text-xs uppercase tracking-wider mb-6">Penduduk Usia Kerja</h3>
+                        <div class="flex flex-col gap-1">
+                            <span id="val-usia-kerja" class="text-4xl font-bold text-white">...</span>
+                            <span id="val-usia-persen" class="text-sm font-medium text-green-400 mt-2">...</span>
+                        </div>
+                    </div>
 
-    <!-- CHARTS -->
-    <div class="grid md:grid-cols-2 gap-8">
+                    <div class="w-[320px] shrink-0 bg-[#1F3C88] text-white rounded-3xl p-8 shadow-xl hover:-translate-y-2 transition duration-300 relative overflow-hidden group">
+                        <div class="absolute -left-6 -bottom-6 bg-emerald-500/20 w-32 h-32 rounded-full blur-3xl group-hover:bg-emerald-500/30 transition"></div>
+                        <h3 class="text-blue-200 font-medium text-xs uppercase tracking-wider mb-6">UMP Jawa Tengah</h3>
+                        <div class="flex flex-col gap-1">
+                            <span id="val-ump" class="text-4xl font-bold text-emerald-400">...</span>
+                            <span class="text-sm font-light opacity-80 mt-2">Berlaku Tahun Berjalan</span>
+                        </div>
+                    </div>
 
-      <div class="chart-box">
-        <canvas id="chartPengangguran"></canvas>
-      </div>
+                    <div class="w-[320px] shrink-0 bg-[#1F3C88] text-white rounded-3xl p-8 shadow-xl hover:-translate-y-2 transition duration-300 relative overflow-hidden group">
+                        <h3 class="text-blue-200 font-medium text-xs uppercase tracking-wider mb-6">Status Pekerjaan</h3>
+                        <div class="flex justify-between items-end mb-3">
+                            <div><div id="val-formal" class="text-3xl font-bold">..%</div><div class="text-xs text-blue-200 mt-1">Formal</div></div>
+                            <div class="text-right"><div id="val-informal" class="text-3xl font-bold text-orange-400">..%</div><div class="text-xs text-orange-200 mt-1">Informal</div></div>
+                        </div>
+                        <div class="w-full h-2 bg-blue-900/50 rounded-full overflow-hidden flex">
+                            <div id="bar-formal" class="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
+                            <div id="bar-informal" class="h-full bg-orange-400"></div>
+                        </div>
+                    </div>
 
-      <div class="chart-box">
-        <canvas id="chartUmur"></canvas>
-      </div>
+                    <div class="w-[320px] shrink-0 bg-[#1F3C88] text-white rounded-3xl p-8 shadow-xl hover:-translate-y-2 transition duration-300 relative overflow-hidden group">
+                        <div class="absolute -right-6 -bottom-6 bg-purple-500/20 w-32 h-32 rounded-full blur-3xl group-hover:bg-purple-500/30 transition"></div>
+                        <h3 class="text-blue-200 font-medium text-xs uppercase tracking-wider mb-6">Usia Kerja Terbanyak</h3>
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-baseline gap-2">
+                                <span id="val-umur-kelompok" class="text-4xl font-bold text-purple-400">...</span>
+                                <span class="text-base font-light opacity-80">Tahun</span>
+                            </div>
+                            <span id="val-umur-jumlah" class="text-sm font-medium text-blue-200 mt-2">...</span>
+                        </div>
+                    </div>
 
-      <div class="chart-box">
-        <canvas id="chartUpah"></canvas>
-      </div>
+                </div>
+            </div>
 
-      <div class="chart-box">
-        <canvas id="chartGender"></canvas>
-      </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <h3 class="text-lg font-bold text-[#1F3C88] mb-6">Pengangguran Berdasarkan Pendidikan</h3>
+                    <div class="relative h-64">
+                        <canvas id="chartPendidikan"></canvas>
+                    </div>
+                </div>
 
-    </div>
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <h3 class="text-lg font-bold text-[#1F3C88] mb-6">Komposisi Umur Penduduk</h3>
+                    <div class="relative h-64">
+                        <canvas id="chartUmur"></canvas>
+                    </div>
+                </div>
 
-  </section>
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 lg:col-span-2 hover:shadow-md transition">
+                    <h3 class="text-lg font-bold text-[#1F3C88] mb-6">Top 5 Sektor dengan Rata-rata Upah Tertinggi</h3>
+                    <div class="relative h-80">
+                        <canvas id="chartTopUpah"></canvas>
+                    </div>
+                </div>
 
-  <script src="js/dashboard.js"></script>
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 lg:col-span-2 hover:shadow-md transition">
+                    <h3 class="text-lg font-bold text-[#1F3C88] mb-2">Perbandingan Upah Laki-laki & Perempuan</h3>
+                    <p class="text-sm text-slate-400 mb-6">Data diurutkan berdasarkan sektor.</p>
+                    <div class="relative h-[600px]">
+                        <canvas id="chartGender"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script src="js/dashboard.js"></script>
 </body>
 </html>

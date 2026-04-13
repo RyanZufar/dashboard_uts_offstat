@@ -1,62 +1,14 @@
 body {
-  font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8fafc;
+    overflow-x: hidden;
 }
 
-/* HERO */
-.hero {
-  position: relative;
-  height: 600px;
-  overflow: hidden;
+/* Menyembunyikan scrollbar untuk card horizontal tapi tetap bisa di-scroll dengan rapi */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
 }
-
-.hero-img {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1.5s;
-}
-
-.hero-img.active {
-  opacity: 1;
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(31,60,136,0.9),
-    rgba(31,60,136,0.3),
-    rgba(0,0,0,0.3)
-  );
-}
-
-.hero-content {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  text-align: center;
-}
-
-/* CARD */
-.card {
-  background: #1F3C88;
-  color: white;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-/* CHART */
-.chart-box {
-  background: white;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
