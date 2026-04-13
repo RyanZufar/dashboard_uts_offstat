@@ -1,30 +1,62 @@
-body { font-family: 'Poppins', sans-serif; }
-
-.header-banner {
-    @apply relative w-full h-[300px] bg-[#1F3C88] flex items-center justify-center overflow-hidden;
+body {
+  font-family: 'Poppins', sans-serif;
 }
 
-.header-overlay {
-    @apply absolute inset-0 bg-gradient-to-b from-[#1F3C88] to-[#122452] opacity-90;
+/* HERO */
+.hero {
+  position: relative;
+  height: 600px;
+  overflow: hidden;
 }
 
-.stat-card {
-    @apply bg-white p-6 rounded-2xl shadow-lg border-t-4 transition-transform hover:-translate-y-1;
+.hero-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.5s;
 }
 
-.stat-card .label { @apply text-xs uppercase tracking-widest text-slate-500 font-bold; }
-.stat-card .value { @apply text-2xl font-bold text-slate-800 mt-1; }
-.stat-card .sub-value { @apply text-xs text-slate-400 mt-1; }
-
-.progress-bg { @apply w-full h-2 bg-slate-100 rounded-full overflow-hidden; }
-.progress-fill { @apply h-full transition-all duration-1000; }
-
-.chart-container {
-    @apply bg-white p-6 rounded-2xl shadow-md border border-slate-100;
+.hero-img.active {
+  opacity: 1;
 }
 
-.chart-container h3 {
-    @apply text-slate-700 font-bold mb-4 text-lg;
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(31,60,136,0.9),
+    rgba(31,60,136,0.3),
+    rgba(0,0,0,0.3)
+  );
 }
 
-canvas { max-height: 400px; }
+.hero-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+}
+
+/* CARD */
+.card {
+  background: #1F3C88;
+  color: white;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* CHART */
+.chart-box {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}

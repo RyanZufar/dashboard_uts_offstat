@@ -1,76 +1,66 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ketenagakerjaan Jateng</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/style.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Jateng</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-slate-50">
+<body class="bg-gray-100">
 
-    <header class="header-banner">
-        <div class="header-overlay"></div>
-        <div class="relative z-10 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-white">Jawa Tengah <span class="text-blue-300">Overview</span></h1>
-            <p class="text-blue-100 mt-2">Data Statistik Ketenagakerjaan Terkini</p>
-        </div>
-    </header>
+  <!-- HERO -->
+  <header class="hero">
+    <img src="assets/images/hero.jpg" class="hero-img active" id="img1">
+    <img src="assets/images/hero2.jpg" class="hero-img" id="img2">
 
-    <main class="max-w-7xl mx-auto px-6 pb-20 -mt-16 relative z-10">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-            <div class="stat-card border-blue-500">
-                <span class="label">Usia Kerja</span>
-                <div id="val-usia-kerja" class="value">Loading...</div>
-                <div id="val-usia-persen" class="sub-value">...</div>
-            </div>
-            <div class="stat-card border-emerald-500">
-                <span class="label">UMP Jateng</span>
-                <div id="val-ump" class="value">Loading...</div>
-                <div class="sub-value">Tahun Berjalan</div>
-            </div>
-            <div class="stat-card border-orange-500">
-                <span class="label">Status Kerja</span>
-                <div class="flex justify-between font-bold mb-1">
-                    <span id="val-formal" class="text-blue-800">..%</span>
-                    <span id="val-informal" class="text-orange-600">..%</span>
-                </div>
-                <div class="progress-bg">
-                    <div id="bar-formal" class="progress-fill bg-blue-800"></div>
-                </div>
-            </div>
-            <div class="stat-card border-purple-500">
-                <span class="label">Kelompok Terbesar</span>
-                <div id="val-umur-kelompok" class="value">...</div>
-                <div id="val-umur-jumlah" class="sub-value">...</div>
-            </div>
-        </div>
+    <div class="overlay"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="chart-container">
-                <h3>Pengangguran Berdasarkan Pendidikan</h3>
-                <canvas id="chartPendidikan"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Komposisi Umur Penduduk</h3>
-                <canvas id="chartUmur"></canvas>
-            </div>
-            <div class="chart-container lg:col-span-2">
-                <h3>Sektor dengan Upah Tertinggi</h3>
-                <canvas id="chartTopUpah"></canvas>
-            </div>
-            <div class="chart-container lg:col-span-2">
-                <h3>Upah Berdasarkan Jenis Kelamin per Sektor</h3>
-                <canvas id="chartGender"></canvas>
-            </div>
-        </div>
-    </main>
+    <div class="hero-content">
+      <h1 class="text-4xl md:text-6xl font-bold">
+        Dashboard Ketenagakerjaan Jawa Tengah
+      </h1>
+      <p class="mt-3 text-lg">
+        Ringkasan statistik berdasarkan data terbaru
+      </p>
+    </div>
+  </header>
 
-    <script src="js/dashboard.js"></script>
+  <!-- CONTENT -->
+  <section class="container mx-auto px-6 py-10">
+
+    <!-- CARDS -->
+    <div id="cards" class="grid md:grid-cols-4 gap-6 mb-10"></div>
+
+    <!-- CHARTS -->
+    <div class="grid md:grid-cols-2 gap-8">
+
+      <div class="chart-box">
+        <canvas id="chartPengangguran"></canvas>
+      </div>
+
+      <div class="chart-box">
+        <canvas id="chartUmur"></canvas>
+      </div>
+
+      <div class="chart-box">
+        <canvas id="chartUpah"></canvas>
+      </div>
+
+      <div class="chart-box">
+        <canvas id="chartGender"></canvas>
+      </div>
+
+    </div>
+
+  </section>
+
+  <script src="js/dashboard.js"></script>
 </body>
 </html>
