@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             grid: { display: false },
                             ticks: {
                                 callback: function(value) {
-                                    return 'Rp ' + formatNumber(value);
+                                    return 'Rp' + formatNumber(value);
                                 }
                             }
                         }, 
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         x: { 
                             stacked: true, 
                             ticks: {
-                                callback: value => 'Rp ' + formatNumber(Math.abs(value)) 
+                                callback: value => 'Rp' + formatNumber(Math.abs(value)) 
                             }, 
                             grid: { color: '#f1f5f9' } 
                         },
