@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     labels: ['Bekerja', 'Pengangguran'],
                     datasets: [{
                         data: [dataBekerja.persentase[0], dataPengangguran.persentase[0]],
-                        backgroundColor: ['#3b82f6', '#94a3b8'],
+                        backgroundColor: ['#1F3C88', '#94a3b8'],
                         borderWidth: 0,
                         hoverBorderWidth: 0,
                         hoverOffset: 6
