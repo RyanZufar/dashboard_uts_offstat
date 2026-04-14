@@ -1,0 +1,8 @@
+/* ================================================================
+   page1.css – Dashboard Ketenagakerjaan Jawa Tengah – Overview
+   ================================================================ */
+
+/* Hero slideshow transition */
+.hero-slide {
+  transition: opacity 2000ms ease-in-out;
+}
