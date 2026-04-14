@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const charts = data.page1.chart;
 
             document.getElementById('val-usia-kerja').innerText = formatNumber(overview.penduduk_usia_kerja.jumlah);
-            document.getElementById('val-usia-persen').innerText = `${overview.penduduk_usia_kerja.persentase}% dari total populasi`;
+            document.getElementById('val-usia-persen').innerText = `${overview.penduduk_usia_kerja.persentase}% jiwa dari total populasi`;
             
             document.getElementById('val-ump').innerText = formatRupiah(overview.ump);
             
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     labels: ['Bekerja', 'Pengangguran'],
                     datasets: [{
                         data: [dataBekerja.persentase[0], dataPengangguran.persentase[0]],
-                        backgroundColor: ['#22c55e', '#ef4444'],
+                        backgroundColor: ['#3b82f6', '#94a3b8'],
                         borderWidth: 0,
                         hoverBorderWidth: 0,
                         hoverOffset: 6
@@ -72,7 +72,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return ' ' + context.label + ': ' + context.raw + '%';
+                                    const dropdown = document.getElementById('filterPendidikan');
+                                    const selectedIndex = parseInt(dropdown.value);
+                                    
+                                    let jumlahAsli = 0;
+                                    if (context.dataIndex === 0) {
+                                        jumlahAsli = dataBekerja.jumlah[selectedIndex];
+                                    } else {
+                                        jumlahAsli = dataPengangguran.jumlah[selectedIndex];
+                                    }
+                                    
+                                    return formatNumber(jumlahAsli) + ' jiwa';
                                 }
                             }
                         }
@@ -119,7 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return ' ' + context.label + ': ' + context.raw + '%';
+                                    const dataIndex = context.dataIndex;
+                                    const jumlahAsli = charts.komposisi_umur.jumlah[dataIndex];
+                                    return formatNumber(jumlahAsli) + ' jiwa';
                                 }
                             }
                         }
@@ -164,7 +176,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         } 
                     },
                     scales: { 
-                        y: { beginAtZero: true, grid: { display: false } }, 
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { display: false },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + formatNumber(value);
+                                }
+                            }
+                        }, 
                         x: { grid: { display: false } } 
                     }
                 }
@@ -185,8 +205,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { stacked: true, ticks: { callback: value => formatNumber(Math.abs(value)) }, grid: { color: '#f1f5f9' } },
-                        y: { stacked: true, grid: { display: false }, ticks: { autoSkip: false } }
+                        x: { 
+                            stacked: true, 
+                            ticks: {
+                                callback: value => 'Rp ' + formatNumber(Math.abs(value)) 
+                            }, 
+                            grid: { color: '#f1f5f9' } 
+                        },
+                        y: { 
+                            stacked: true, 
+                            grid: { display: false }, 
+                            ticks: { autoSkip: false } 
+                        }
                     },
                     plugins: {
                         datalabels: { display: false },

@@ -29,7 +29,7 @@
         "persentase": [97.34, 95.71, 91.23, 94.51]
       },
       "komposisi_umur": {
-        "labels": ["0-14", "15-64", "65+"],
+        "labels": ["0-14", "15-59", "60+"],
         "jumlah": [8239290, 24369940, 5283050],
         "persentase": [21.74, 64.31, 13.94]
       },
@@ -62,28 +62,40 @@
       ],
       "upah_gender_sektor": [
         {
+          "sektor": "Jasa Lainnya",
+          "laki_laki": 2071947,
+          "perempuan": 1223629,
+          "total": 1500907
+        },
+        {
+          "sektor": "Pertanian, Kehutanan, Perikanan",
+          "laki_laki": 2109829,
+          "perempuan": 1148776,
+          "total": 1960594
+        },
+        {
+          "sektor": "Pengadaan Air, Pengelolaan Sampah",
+          "laki_laki": 2254799,
+          "perempuan": 1664519,
+          "total": 2136195
+        },
+        {
+          "sektor": "Jasa Perusahaan",
+          "laki_laki": 2536765,
+          "perempuan": 1933434,
+          "total": 2393394
+        },
+        {
+          "sektor": "Konstruksi",
+          "laki_laki": 2653793,
+          "perempuan": 3405856,
+          "total": 2669046
+        },
+        {
           "sektor": "Real Estat",
           "laki_laki": 2993074,
           "perempuan": 2806878,
           "total": 2944384
-        },
-        {
-          "sektor": "Jasa Keuangan & Asuransi",
-          "laki_laki": 3520641,
-          "perempuan": 3432528,
-          "total": 3492126
-        },
-        {
-          "sektor": "Pertambangan & Penggalian",
-          "laki_laki": 3394414,
-          "perempuan": 1566365,
-          "total": 3324573
-        },
-        {
-          "sektor": "Jasa Kesehatan & Kegiatan Sosial",
-          "laki_laki": 3467960,
-          "perempuan": 3217958,
-          "total": 3301399
         },
         {
           "sektor": "Pengadaan Listrik & Gas",
@@ -92,16 +104,28 @@
           "total": 3107236
         },
         {
-          "sektor": "Jasa Pendidikan",
-          "laki_laki": 2809643,
-          "perempuan": 2406115,
-          "total": 2557604
+          "sektor": "Pertambangan & Penggalian",
+          "laki_laki": 3394414,
+          "perempuan": 1566365,
+          "total": 3324573
         },
         {
           "sektor": "Administrasi Pemerintahan, Pertahanan, dan Jaminan Sosial, Jasa Pendidikan",
           "laki_laki": 3888414,
           "perempuan": 3367657,
           "total": 3775556
+        },
+        {
+          "sektor": "Jasa Keuangan & Asuransi",
+          "laki_laki": 3520641,
+          "perempuan": 3432528,
+          "total": 3492126
+        },
+        {
+          "sektor": "Jasa Kesehatan & Kegiatan Sosial",
+          "laki_laki": 3467960,
+          "perempuan": 3217958,
+          "total": 3301399
         },
         {
           "sektor": "Transportasi & Pergudangan",
@@ -116,16 +140,10 @@
           "total": 2765571
         },
         {
-          "sektor": "Konstruksi",
-          "laki_laki": 2653793,
-          "perempuan": 3405856,
-          "total": 2669046
-        },
-        {
-          "sektor": "Jasa Perusahaan",
-          "laki_laki": 2536765,
-          "perempuan": 1933434,
-          "total": 2393394
+          "sektor": "Jasa Pendidikan",
+          "laki_laki": 2809643,
+          "perempuan": 2406115,
+          "total": 2557604
         },
         {
           "sektor": "Industri Pengolahan",
@@ -134,34 +152,16 @@
           "total": 2212674
         },
         {
-          "sektor": "Pengadaan Air, Pengelolaan Sampah",
-          "laki_laki": 2254799,
-          "perempuan": 1664519,
-          "total": 2136195
-        },
-        {
           "sektor": "Perdagangan Besar & Eceran",
           "laki_laki": 2258379,
           "perempuan": 1830002,
           "total": 2091742
         },
         {
-          "sektor": "Pertanian, Kehutanan, Perikanan",
-          "laki_laki": 2109829,
-          "perempuan": 1148776,
-          "total": 1960594
-        },
-        {
           "sektor": "Penyediaan Akomodasi & Makan Minum",
           "laki_laki": 2058179,
           "perempuan": 1542525,
           "total": 1781399
-        },
-        {
-          "sektor": "Jasa Lainnya",
-          "laki_laki": 2071947,
-          "perempuan": 1223629,
-          "total": 1500907
         }
       ]
     }
