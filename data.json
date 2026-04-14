@@ -2584,7 +2584,7 @@
       },
       {
         "kabupaten": "Purbalingga",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 1037600,
           "penduduk_bukan_bekerja": 205277,
@@ -2598,7 +2598,7 @@
       },
       {
         "kabupaten": "Banjarnegara",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 1057600,
           "penduduk_bukan_bekerja": 219364,
@@ -2612,7 +2612,7 @@
       },
       {
         "kabupaten": "Kebumen",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 1414800,
           "penduduk_bukan_bekerja": 250240,
@@ -2626,7 +2626,7 @@
       },
       {
         "kabupaten": "Purworejo",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 795000,
           "penduduk_bukan_bekerja": 166844,
@@ -2640,7 +2640,7 @@
       },
       {
         "kabupaten": "Wonosobo",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 920500,
           "penduduk_bukan_bekerja": 179146,
@@ -2654,7 +2654,7 @@
       },
       {
         "kabupaten": "Magelang",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 1341500,
           "penduduk_bukan_bekerja": 236036,
@@ -2710,7 +2710,7 @@
       },
       {
         "kabupaten": "Wonogiri",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 1054200,
           "penduduk_bukan_bekerja": 193231,
@@ -2906,7 +2906,7 @@
       },
       {
         "kabupaten": "Pekalongan",
-        "cluster": 1,
+        "cluster": 2,
         "cluster_data": {
           "penduduk": 1019000,
           "penduduk_bukan_bekerja": 184065,
