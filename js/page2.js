@@ -48,26 +48,21 @@ let   globalPage2 = null;
    INIT
    ================================================================ */
 function initDashboard() {
-  // Load data.json + cluster_kabupaten.json (source of truth for clusters)
-  Promise.all([
-    fetch('data.json').then(r => {
-      if (!r.ok) throw new Error('Gagal mengambil data.json (HTTP ' + r.status + ')');
-      return r.json();
-    }),
-    fetch('cluster_kabupaten.json').then(r => {
-      if (!r.ok) throw new Error('Gagal mengambil cluster_kabupaten.json (HTTP ' + r.status + ')');
-      return r.json();
-    }),
-  ])
-  .then(([data, clusterData]) => {
-    // Override kluster dari file cluster yang sudah dikoreksi
-    data.page2.kluster = clusterData;
+  // Hanya ambil data.json karena data klaster sudah ada di dalamnya
+  fetch('data.json')
+  .then(r => {
+    if (!r.ok) throw new Error('Gagal mengambil data.json (HTTP ' + r.status + ')');
+    return r.json();
+  })
+  .then(data => {
     globalPage2 = data.page2;
 
     populateDropdown(data.page2);
     buildLayout();
     renderAll(data.page2, 'Jawa Tengah');
-    initMap(clusterData);
+    
+    // Ambil data kluster langsung dari data.json untuk peta
+    initMap(data.page2.kluster);
 
     document.getElementById('filterWilayah').addEventListener('change', function () {
       renderAll(globalPage2, this.value);
