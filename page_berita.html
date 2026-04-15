@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berita Terkini – Dashboard Ketenagakerjaan Jawa Tengah</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+        }
+        .nav-link {
+            transition: all 0.3s;
+        }
+        .nav-link:hover {
+            color: #F97316;
+        }
+        .active-link {
+            color: #F97316 !important;
+            font-weight: 600;
+            border-bottom: 2px solid #F97316;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="absolute top-0 inset-x-0 px-6 md:px-12 py-6 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <span class="text-white font-bold text-2xl drop-shadow-md tracking-wide">
+                Dashboard
+            </span>
+        </div>
+        <div class="hidden md:flex items-center gap-2 font-medium text-white">
+            <a href="index.html" class="px-5 py-2.5 rounded-full hover:bg-white/15 hover:backdrop-blur-sm transition">Home</a>
+            <a href="page2.html" class="px-5 py-2.5 rounded-full hover:bg-white/15 hover:backdrop-blur-sm transition">Dashboard</a>
+            <a href="page_berita.html" class="bg-white/20 backdrop-blur-md text-white px-5 py-2.5 rounded-full border border-white/10 shadow-sm">Berita</a>
+        </div>
+    </nav>
+
+    <header class="relative w-full h-[200px] md:h-[240px] bg-[#1F3C88] z-0">
+        <div class="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 text-center mt-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                Berita Ketenagakerjaan
+            </h1>
+        </div>
+    </header>
+
+    <main class="w-full bg-[#f8fafc] rounded-t-[3rem] -mt-12 relative z-10 px-4 md:px-8 py-14 min-h-screen">
+        <div class="max-w-[1440px] mx-auto">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="news-container">
+                <div class="col-span-full flex flex-col items-center justify-center py-20">
+                    <div class="w-10 h-10 border-4 border-slate-200 border-t-[#F97316] rounded-full animate-spin mb-4"></div>
+                    <p class="text-slate-400 font-medium">Mengambil berita terbaru...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        async function fetchNews() {
+            const scriptURL = "https://script.google.com/macros/s/AKfycbwAM14EFHLkjKlmUNc_B6wfK725PuYnAZWYpQtAIvDjcw4wv0-FiGRTZzOr_JUhtdWb/exec";
+            
+            const container = document.getElementById('news-container');
+
+            try {
+                const response = await fetch(scriptURL);
+                const data = await response.json();
+
+                container.innerHTML = '';
+
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
+                            <p class="text-slate-400">Belum ada berita di Database. Silakan lakukan sinkronisasi di Spreadsheet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                data.forEach(news => {
+                    let domainName = "Berita";
+                    try {
+                        domainName = new URL(news.url).hostname.replace('www.', '');
+                    } catch(e) {}
+                    let fallbackImg = "https://placehold.co/600x400/1F3C88/FFFFFF?text=" + encodeURIComponent(domainName);
+
+                    container.innerHTML += `
+                        <a href="${news.url}" target="_blank" class="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full block">
+                            <div class="relative h-48 md:h-56 overflow-hidden bg-slate-100">
+                                <img src="${news.image}" 
+                                     alt="Thumbnail" 
+                                     onerror="this.onerror=null;this.src='${fallbackImg}';"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            </div>
+                            
+                            <div class="p-6 flex-grow flex items-center">
+                                <h2 class="font-bold text-slate-800 text-base md:text-lg leading-snug line-clamp-3 group-hover:text-[#F97316] transition-colors duration-300">
+                                    ${news.title}
+                                </h2>
+                            </div>
+                        </a>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Gagal memuat berita:", error);
+                container.innerHTML = `
+                    <div class="col-span-full bg-red-50 text-red-600 p-8 rounded-2xl text-center border border-red-100">
+                        <p class="font-bold">Gagal terhubung ke Database Berita</p>
+                        <p class="text-sm mt-1">Pastikan URL Apps Script sudah benar dan aksesnya diatur ke "Anyone".</p>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchNews);
+    </script>
+
+</body>
+</html>
