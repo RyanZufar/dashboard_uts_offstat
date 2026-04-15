@@ -146,13 +146,13 @@ function buildLayout() {
     <div class="grid-2">
       <div class="card">
         <div class="card-header" style="justify-content:center">
-          <h3>Tren TPAK (2017–2025)</h3>
+          <h3>Tren Tingkat Partisipasi Angkatan Kerja (2017–2025)</h3>
         </div>
         <div class="chart-wrap h-72"><canvas id="chartTPAK"></canvas></div>
       </div>
       <div class="card">
         <div class="card-header" style="justify-content:center">
-          <h3>Tren TPT (2017–2025)</h3>
+          <h3>Tren Tingkat Pengangguran Terbuka (2017–2025)</h3>
         </div>
         <div class="chart-wrap h-72"><canvas id="chartTPT"></canvas></div>
       </div>

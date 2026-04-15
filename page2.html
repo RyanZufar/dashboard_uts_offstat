@@ -3,29 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Ketenagakerjaan Jawa Tengah</title>
-  <meta name="description"
-        content="Analisis Regional per Kabupaten/Kota ketenagakerjaan Provinsi Jawa Tengah: tren TPT & TPAK, upah, pasar kerja, klaster produktivitas, dan peta choropleth interaktif.">
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-
-  <!-- Leaflet (map) -->
+  <title>Analisis - Dashboard Ketenagakerjaan Jawa Tengah</title>
+  <meta name="description" content="Analisis Regional per Kabupaten/Kota ketenagakerjaan Provinsi Jawa Tengah: tren TPT & TPAK, upah, pasar kerja, klaster produktivitas, dan peta choropleth interaktif.">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link  rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Chart.js + Datalabels -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-
-  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/page2.css">
 </head>
 <body>
 
-  <!-- ── NAVIGATION ── -->
   <nav>
     <div class="nav-brand">
       <span>Dashboard</span>
@@ -33,10 +22,10 @@
     <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="page2.html" class="active">Dashboard</a>
+      <a href="page_berita.html">Berita</a>
     </div>
   </nav>
 
-  <!-- ── HERO ── (dropdown removed – peta sebagai filter interaktif) -->
   <div class="hero">
     <div class="hero-inner">
       <h1>Analisis Regional Ketenagakerjaan</h1>
@@ -44,16 +33,10 @@
     </div>
   </div>
 
-  <!-- ── MAIN CONTENT (built by JS) ── -->
   <main id="mainContent">
     <div class="spinner" id="loadingSpinner" role="status" aria-label="Memuat data"></div>
   </main>
 
-  <footer>
-    <p>Sumber data: Badan Pusat Statistik Provinsi Jawa Tengah &mdash; Dashboard UTS Official Statistics 2024</p>
-  </footer>
-
-  <!-- Page 2 Logic -->
   <script src="js/page2.js"></script>
 
 </body>

@@ -367,7 +367,7 @@ main {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: .65rem;
 }
 
@@ -383,6 +383,8 @@ main {
   letter-spacing: .06em;
   color: var(--grey);
   margin-bottom: .2rem;
+
+  white-space: nowrap;
 }
 
 .kpi-item .kpi-value {
