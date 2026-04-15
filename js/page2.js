@@ -43,39 +43,6 @@ const CLUSTER_META = {
   },
 };
 
-// ── DUMMY NEWS ──────────────────────────────────────────────────
-const DUMMY_NEWS = [
-  {
-    source: 'BPS Jateng',
-    date:   '14 Apr 2025',
-    title:  'TPT Jawa Tengah Turun Menjadi 4,15% pada Februari 2025',
-    url:    'https://jateng.bps.go.id',
-  },
-  {
-    source: 'Kemnaker RI',
-    date:   '12 Apr 2025',
-    title:  'Program Kartu Prakerja Gelombang 68 Sasar 50.000 Pencari Kerja Baru',
-    url:    'https://kemnaker.go.id',
-  },
-  {
-    source: 'Kompas.com',
-    date:   '10 Apr 2025',
-    title:  'Upah Minimum Kota Semarang 2025 Naik 6,5% Menjadi Rp3,54 Juta',
-    url:    'https://www.kompas.com',
-  },
-  {
-    source: 'BPS Pusat',
-    date:   '5 Apr 2025',
-    title:  'Sakernas Feb 2025: Tingkat Partisipasi Angkatan Kerja Nasional Naik 0,3 Poin',
-    url:    'https://bps.go.id',
-  },
-  {
-    source: 'Joglosemar',
-    date:   '2 Apr 2025',
-    title:  'Klaster Industri Kudus Serap 12.000 Tenaga Kerja Baru di Semester I 2025',
-    url:    '#',
-  },
-];
 
 // ── MUTABLE STATE ───────────────────────────────────────────────
 const charts = { tpak: null, tpt: null, upah: null, pasar: null, radar: null };
@@ -139,23 +106,6 @@ function resetMapSelection() {
 function buildLayout() {
   document.getElementById('loadingSpinner').remove();
 
-  // ── News bar – injected ABOVE mainContent ──
-  if (!document.getElementById('newsBar')) {
-    const newsBar = document.createElement('div');
-    newsBar.id        = 'newsBar';
-    newsBar.className = 'news-bar';
-    newsBar.innerHTML = `
-      <div class="news-bar-label"><span class="live-dot"></span>BERITA</div>
-      <div class="news-list">
-        ${DUMMY_NEWS.map(n => `
-          <a href="${n.url}" target="_blank" rel="noopener" class="news-card">
-            <div class="news-card-meta">${n.source}&nbsp;&middot;&nbsp;${n.date}</div>
-            <div class="news-card-title">${n.title}</div>
-          </a>
-        `).join('')}
-      </div>`;
-    document.getElementById('mainContent').before(newsBar);
-  }
 
   document.getElementById('mainContent').innerHTML = `
 
@@ -218,6 +168,7 @@ function buildLayout() {
           <h3>Perbandingan Upah Formal dan Informal</h3>
         </div>
         <div class="chart-wrap h-72"><canvas id="chartUpah"></canvas></div>
+        <div id="upahStatBox" class="pasar-stat-box"></div>
       </div>
       <div class="card">
         <div class="card-header">
@@ -248,7 +199,7 @@ function buildLayout() {
           <div class="card-header" style="justify-content:center">
             <h3>Profil Performa Wilayah terhadap Rata-rata Klaster</h3>
           </div>
-          <p class="radar-description" style="text-align:center;">
+          <p class="radar-description" style="text-align:justify;">
             Grafik di bawah ini memvisualisasikan bagaimana performa indikator ketenagakerjaan di wilayah terpilih 
             jika dibandingkan dengan kondisi rata-rata pada klaster yang sama. Nilai <strong>100%</strong> 
             merepresentasikan titik rata-rata klaster.&nbsp;
@@ -371,7 +322,7 @@ function renderChartTPAK(trenItem) {
         y: {
           title: { display: true, text: 'TPAK (%)', color: '#1F3C88', font: { weight: '600' } },
           grid:  { color: '#f1f5f9' },
-          ticks: { callback: v => v + '%' },
+          ticks: { callback: v => parseFloat(v.toFixed(1)) + '%' },
         },
         x: { grid: { display: false } },
       },
@@ -411,7 +362,7 @@ function renderChartTPT(trenItem) {
         y: {
           title: { display: true, text: 'TPT (%)', color: '#F97316', font: { weight: '600' } },
           grid:  { color: '#f1f5f9' },
-          ticks: { callback: v => v + '%' },
+          ticks: { callback: v => parseFloat(v.toFixed(1)) + '%' },
         },
         x: { grid: { display: false } },
       },
@@ -431,6 +382,29 @@ function renderChartUpah(kabItem, wilayah, page2) {
   const provFormal   = provData?.upah?.formal   ?? 0;
   const provInformal = provData?.upah?.informal ?? 0;
   const isProvince   = (wilayah === 'Jawa Tengah');
+
+  const upahStatBox = document.getElementById('upahStatBox');
+  if (upahStatBox) {
+    if (formal > 0 || informal > 0) {
+      const diff = Math.abs(formal - informal);
+      const dom = formal > informal ? 'Sektor Formal' : 'Sektor Informal';
+      const domColor = formal > informal ? '#1F3C88' : '#F97316';
+      
+      upahStatBox.innerHTML = `
+        <div class="pasar-stat-row">
+          <span class="pasar-stat-badge" style="background:${domColor}20;color:${domColor}">
+            ${dom} Tinggi
+          </span>
+          <span class="pasar-stat-text">
+            Upah <strong style="color:${domColor}">${dom}</strong> lebih tinggi 
+            <strong style="color:${domColor}">${fRupiah(diff)}</strong> 
+            dibanding sektor lainnya.
+          </span>
+        </div>`;
+    } else {
+      upahStatBox.innerHTML = '';
+    }
+  }
 
   const radiusTop = { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 };
 
@@ -519,10 +493,10 @@ function renderChartPasar(kabItem, mode) {
   const total    = lk + pr;
   const lkPct    = lk / total * 100;
   const prPct    = pr / total * 100;
-  const diffPct  = Math.abs(lkPct - prPct).toFixed(1);
+  const diffPct  = (Math.abs(lk - pr) / total * 100).toFixed(1);
   const dominant = lk > pr ? 'Laki-laki' : 'Perempuan';
   const minority = lk > pr ? 'Perempuan' : 'Laki-laki';
-  const domColor = lk > pr ? '#1F3C88'   : '#F97316';
+  const domColor = lk > pr ? '#1F3C88' : '#F97316';
   const modeLabel= mode === 'lowongan' ? 'Lowongan Kerja Terdaftar' : 'Pencari Kerja Terdaftar';
 
   const statBox = document.getElementById('pasarStatBox');
@@ -556,7 +530,7 @@ function renderChartPasar(kabItem, mode) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      cutout: '65%',
+      cutout: '50%',
       plugins: {
         datalabels: {
           color: '#fff', font: { weight: 'bold', size: 12 },
@@ -665,7 +639,7 @@ function renderChartRadar(klusterItem, allKluster) {
       ],
       datasets: [
         {
-          label: klusterItem.kabupaten,
+          label: ' ' + klusterItem.kabupaten,
           data:  values,
           borderColor:         '#1F3C88',
           backgroundColor:     'rgba(31,60,136,.15)',
@@ -673,7 +647,7 @@ function renderChartRadar(klusterItem, allKluster) {
           borderWidth: 2.5, pointRadius: 5,
         },
         {
-          label: 'Rata-rata Klaster (100%)',
+          label: ' Rata-rata Klaster (100%)',
           data:  [100, 100, 100, 100, 100],
           borderColor:     '#94A3B8',
           backgroundColor: 'rgba(148,163,184,.08)',
@@ -686,7 +660,7 @@ function renderChartRadar(klusterItem, allKluster) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         datalabels: { display: false },
-        legend:     { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } },
+        legend:     { position: 'top', labels: { usePointStyle: true, boxWidth: 10, padding: 25 } },
         tooltip: {
           callbacks: {
             label: c => {
@@ -876,18 +850,22 @@ function renderChoropleth(geojson, klusterData, clusterLookup) {
       const meta        = item ? CLUSTER_META[item.cluster] : null;
 
       const tip = `
-        <div style="font-family:'Poppins',sans-serif;min-width:200px">
-          <div style="font-weight:700;color:#1F3C88;font-size:.85rem;margin-bottom:3px">${displayName}</div>
+        <div style="font-family:'Poppins',sans-serif;min-width:260px;padding:2px">
+          <div style="font-weight:700;color:#1F3C88;font-size:.9rem;margin-bottom:2px">${displayName}</div>
           ${meta
-            ? `<div style="font-size:.75rem;color:${meta.color};font-weight:600">${meta.label}</div>
-               <hr style="margin:5px 0;border-color:#e2e8f0">
-               <div style="font-size:.73rem;color:#64748b">
-                 TPT: <strong>${cd.tpt}%</strong>&nbsp;|&nbsp;TPAK: <strong>${cd.tpak}%</strong>
+            ? `<div style="font-size:.72rem;color:${meta.color};font-weight:600;margin-bottom:6px">${meta.label}</div>
+               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:0.75rem;color:#475569">
+                 <div>Penduduk: <strong style="color:#1e293b">${cd.penduduk >= 1000000 ? (cd.penduduk/1000000).toFixed(1)+'jt' : fNum(cd.penduduk)}</strong></div>
+                 <div>IPM: <strong style="color:#1e293b">${cd.ipm}</strong></div>
+                 <div>TPT: <strong style="color:#F97316">${cd.tpt}%</strong></div>
+                 <div>TPAK: <strong style="color:#1F3C88">${cd.tpak}%</strong></div>
+                 <div>Pengeluaran: <strong style="color:#1e293b">${(cd.pengeluaran_per_kapita/1000000).toFixed(1)}jt</strong></div>
+                 <div>Upah: <strong style="color:#1e293b">${(cd.rata_upah/1000000).toFixed(1)}jt</strong></div>
                </div>
-               <div style="font-size:.73rem;color:#64748b">IPM: <strong>${cd.ipm}</strong></div>`
+               <hr style="margin:8px 0;border:0;border-top:1px solid #e2e8f0;">`
             : `<div style="font-size:.75rem;color:#94a3b8">Tidak terklasifikasi</div>`}
-          <div style="font-size:.69rem;color:#94a3b8;margin-top:5px;font-style:italic">
-            &#128070; Klik untuk memilih wilayah ini
+          <div style="font-size:0.7rem;color:#94a3b8;font-style:italic">
+             &#128070; Klik untuk analisis detail
           </div>
         </div>`;
 
