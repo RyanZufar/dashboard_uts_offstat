@@ -1,0 +1,492 @@
+[
+  {
+    "kabupaten": "Cilacap",
+    "cluster": 1,
+    "cluster_data": {
+      "penduduk": 2027400,
+      "penduduk_bukan_bekerja": 509358,
+      "tpt": 7.83,
+      "tpak": 67.95,
+      "ipm": 72.38,
+      "tkk": 92.17,
+      "pengeluaran_per_kapita": 11868000,
+      "rata_upah": 2312464
+    }
+  },
+  {
+    "kabupaten": "Banyumas",
+    "cluster": 1,
+    "cluster_data": {
+      "penduduk": 1847100,
+      "penduduk_bukan_bekerja": 463129,
+      "tpt": 6.18,
+      "tpak": 68.03,
+      "ipm": 74.52,
+      "tkk": 93.82,
+      "pengeluaran_per_kapita": 12960000,
+      "rata_upah": 2021901
+    }
+  },
+  {
+    "kabupaten": "Purbalingga",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1037600,
+      "penduduk_bukan_bekerja": 205277,
+      "tpt": 4.96,
+      "tpak": 74.47,
+      "ipm": 70.69,
+      "tkk": 95.04,
+      "pengeluaran_per_kapita": 11343000,
+      "rata_upah": 2039433
+    }
+  },
+  {
+    "kabupaten": "Banjarnegara",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1057600,
+      "penduduk_bukan_bekerja": 219364,
+      "tpt": 5.57,
+      "tpak": 73.38,
+      "ipm": 69.6,
+      "tkk": 94.43,
+      "pengeluaran_per_kapita": 10595000,
+      "rata_upah": 2164176
+    }
+  },
+  {
+    "kabupaten": "Kebumen",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1414800,
+      "penduduk_bukan_bekerja": 250240,
+      "tpt": 5.07,
+      "tpak": 77.37,
+      "ipm": 71.93,
+      "tkk": 94.93,
+      "pengeluaran_per_kapita": 10176000,
+      "rata_upah": 1832197
+    }
+  },
+  {
+    "kabupaten": "Purworejo",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 795000,
+      "penduduk_bukan_bekerja": 166844,
+      "tpt": 3.89,
+      "tpak": 73.72,
+      "ipm": 75.11,
+      "tkk": 96.11,
+      "pengeluaran_per_kapita": 11584000,
+      "rata_upah": 2163515
+    }
+  },
+  {
+    "kabupaten": "Wonosobo",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 920500,
+      "penduduk_bukan_bekerja": 179146,
+      "tpt": 4.02,
+      "tpak": 74.97,
+      "ipm": 69.82,
+      "tkk": 95.98,
+      "pengeluaran_per_kapita": 11980000,
+      "rata_upah": 1931123
+    }
+  },
+  {
+    "kabupaten": "Magelang",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1341500,
+      "penduduk_bukan_bekerja": 236036,
+      "tpt": 3.55,
+      "tpak": 77.72,
+      "ipm": 71.99,
+      "tkk": 96.45,
+      "pengeluaran_per_kapita": 10926000,
+      "rata_upah": 2119083
+    }
+  },
+  {
+    "kabupaten": "Boyolali",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1099900,
+      "penduduk_bukan_bekerja": 213122,
+      "tpt": 3.16,
+      "tpak": 75.25,
+      "ipm": 75.96,
+      "tkk": 96.84,
+      "pengeluaran_per_kapita": 14195000,
+      "rata_upah": 2491920
+    }
+  },
+  {
+    "kabupaten": "Klaten",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1292800,
+      "penduduk_bukan_bekerja": 266697,
+      "tpt": 3.97,
+      "tpak": 74.24,
+      "ipm": 78.16,
+      "tkk": 96.03,
+      "pengeluaran_per_kapita": 13513000,
+      "rata_upah": 2124837
+    }
+  },
+  {
+    "kabupaten": "Sukoharjo",
+    "cluster": 0,
+    "cluster_data": {
+      "penduduk": 941700,
+      "penduduk_bukan_bekerja": 237917,
+      "tpt": 3.65,
+      "tpak": 68.21,
+      "ipm": 79.3,
+      "tkk": 96.35,
+      "pengeluaran_per_kapita": 12758000,
+      "rata_upah": 2822389
+    }
+  },
+  {
+    "kabupaten": "Wonogiri",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1054200,
+      "penduduk_bukan_bekerja": 193231,
+      "tpt": 2.4,
+      "tpak": 77.75,
+      "ipm": 72.55,
+      "tkk": 97.6,
+      "pengeluaran_per_kapita": 10634000,
+      "rata_upah": 2377621
+    }
+  },
+  {
+    "kabupaten": "Karanganyar",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 961900,
+      "penduduk_bukan_bekerja": 193027,
+      "tpt": 3.47,
+      "tpak": 74.57,
+      "ipm": 78.11,
+      "tkk": 96.53,
+      "pengeluaran_per_kapita": 12732000,
+      "rata_upah": 2464508
+    }
+  },
+  {
+    "kabupaten": "Sragen",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1004800,
+      "penduduk_bukan_bekerja": 203242,
+      "tpt": 3.53,
+      "tpak": 74.54,
+      "ipm": 75.53,
+      "tkk": 96.47,
+      "pengeluaran_per_kapita": 13890000,
+      "rata_upah": 2209726
+    }
+  },
+  {
+    "kabupaten": "Grobogan",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1506400,
+      "penduduk_bukan_bekerja": 275035,
+      "tpt": 3.23,
+      "tpak": 76.56,
+      "ipm": 72.02,
+      "tkk": 96.77,
+      "pengeluaran_per_kapita": 11548000,
+      "rata_upah": 2428702
+    }
+  },
+  {
+    "kabupaten": "Blora",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 908000,
+      "penduduk_bukan_bekerja": 194480,
+      "tpt": 3.67,
+      "tpak": 73.51,
+      "ipm": 71.39,
+      "tkk": 96.33,
+      "pengeluaran_per_kapita": 10926000,
+      "rata_upah": 2563595
+    }
+  },
+  {
+    "kabupaten": "Rembang",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 665200,
+      "penduduk_bukan_bekerja": 134391,
+      "tpt": 2.84,
+      "tpak": 74.5,
+      "ipm": 72.53,
+      "tkk": 97.16,
+      "pengeluaran_per_kapita": 11830000,
+      "rata_upah": 2520841
+    }
+  },
+  {
+    "kabupaten": "Pati",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1370800,
+      "penduduk_bukan_bekerja": 253931,
+      "tpt": 3.87,
+      "tpak": 76.75,
+      "ipm": 74.1,
+      "tkk": 96.13,
+      "pengeluaran_per_kapita": 11829000,
+      "rata_upah": 2329469
+    }
+  },
+  {
+    "kabupaten": "Kudus",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 883300,
+      "penduduk_bukan_bekerja": 167904,
+      "tpt": 3.19,
+      "tpak": 75.53,
+      "ipm": 77.22,
+      "tkk": 96.81,
+      "pengeluaran_per_kapita": 12533000,
+      "rata_upah": 2349178
+    }
+  },
+  {
+    "kabupaten": "Jepara",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1232900,
+      "penduduk_bukan_bekerja": 268499,
+      "tpt": 3.34,
+      "tpak": 71.94,
+      "ipm": 74.32,
+      "tkk": 96.66,
+      "pengeluaran_per_kapita": 11729000,
+      "rata_upah": 2325753
+    }
+  },
+  {
+    "kabupaten": "Demak",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1253000,
+      "penduduk_bukan_bekerja": 265513,
+      "tpt": 4.75,
+      "tpak": 72.36,
+      "ipm": 74.57,
+      "tkk": 95.25,
+      "pengeluaran_per_kapita": 11591000,
+      "rata_upah": 2599969
+    }
+  },
+  {
+    "kabupaten": "Semarang",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1089800,
+      "penduduk_bukan_bekerja": 177492,
+      "tpt": 3.73,
+      "tpak": 79.29,
+      "ipm": 75.67,
+      "tkk": 96.27,
+      "pengeluaran_per_kapita": 13377000,
+      "rata_upah": 2452930
+    }
+  },
+  {
+    "kabupaten": "Temanggung",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 814900,
+      "penduduk_bukan_bekerja": 141143,
+      "tpt": 2.35,
+      "tpak": 78.06,
+      "ipm": 71.87,
+      "tkk": 97.65,
+      "pengeluaran_per_kapita": 10519000,
+      "rata_upah": 2409857
+    }
+  },
+  {
+    "kabupaten": "Kendal",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1064800,
+      "penduduk_bukan_bekerja": 193553,
+      "tpt": 5.01,
+      "tpak": 76.85,
+      "ipm": 74.34,
+      "tkk": 94.99,
+      "pengeluaran_per_kapita": 13277000,
+      "rata_upah": 2700686
+    }
+  },
+  {
+    "kabupaten": "Batang",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 838200,
+      "penduduk_bukan_bekerja": 142622,
+      "tpt": 5.67,
+      "tpak": 77.91,
+      "ipm": 70.74,
+      "tkk": 94.33,
+      "pengeluaran_per_kapita": 10919000,
+      "rata_upah": 2173067
+    }
+  },
+  {
+    "kabupaten": "Pekalongan",
+    "cluster": 2,
+    "cluster_data": {
+      "penduduk": 1019000,
+      "penduduk_bukan_bekerja": 184065,
+      "tpt": 3.3,
+      "tpak": 76.38,
+      "ipm": 71.84,
+      "tkk": 96.7,
+      "pengeluaran_per_kapita": 11701000,
+      "rata_upah": 2032254
+    }
+  },
+  {
+    "kabupaten": "Pemalang",
+    "cluster": 1,
+    "cluster_data": {
+      "penduduk": 1541700,
+      "penduduk_bukan_bekerja": 330346,
+      "tpt": 6.63,
+      "tpak": 72.24,
+      "ipm": 68.55,
+      "tkk": 93.37,
+      "pengeluaran_per_kapita": 10017000,
+      "rata_upah": 2148966
+    }
+  },
+  {
+    "kabupaten": "Tegal",
+    "cluster": 1,
+    "cluster_data": {
+      "penduduk": 1674800,
+      "penduduk_bukan_bekerja": 338729,
+      "tpt": 7.53,
+      "tpak": 73.49,
+      "ipm": 70.77,
+      "tkk": 92.47,
+      "pengeluaran_per_kapita": 10972000,
+      "rata_upah": 2364609
+    }
+  },
+  {
+    "kabupaten": "Brebes",
+    "cluster": 1,
+    "cluster_data": {
+      "penduduk": 2065500,
+      "penduduk_bukan_bekerja": 447329,
+      "tpt": 8.35,
+      "tpak": 71.92,
+      "ipm": 68.46,
+      "tkk": 91.65,
+      "pengeluaran_per_kapita": 11389000,
+      "rata_upah": 2196879
+    }
+  },
+  {
+    "kabupaten": "Kota Magelang",
+    "cluster": 0,
+    "cluster_data": {
+      "penduduk": 122400,
+      "penduduk_bukan_bekerja": 32329,
+      "tpt": 4.4,
+      "tpak": 67.66,
+      "ipm": 82.15,
+      "tkk": 95.6,
+      "pengeluaran_per_kapita": 13619000,
+      "rata_upah": 2602917
+    }
+  },
+  {
+    "kabupaten": "Kota Surakarta",
+    "cluster": 0,
+    "cluster_data": {
+      "penduduk": 528000,
+      "penduduk_bukan_bekerja": 138300,
+      "tpt": 4.61,
+      "tpak": 67.42,
+      "ipm": 84.4,
+      "tkk": 95.39,
+      "pengeluaran_per_kapita": 16291000,
+      "rata_upah": 2454233
+    }
+  },
+  {
+    "kabupaten": "Kota Salatiga",
+    "cluster": 0,
+    "cluster_data": {
+      "penduduk": 201300,
+      "penduduk_bukan_bekerja": 46664,
+      "tpt": 3.86,
+      "tpak": 70.72,
+      "ipm": 85.72,
+      "tkk": 96.14,
+      "pengeluaran_per_kapita": 17096000,
+      "rata_upah": 2873920
+    }
+  },
+  {
+    "kabupaten": "Kota Semarang",
+    "cluster": 0,
+    "cluster_data": {
+      "penduduk": 1708800,
+      "penduduk_bukan_bekerja": 407975,
+      "tpt": 5.82,
+      "tpak": 69.88,
+      "ipm": 85.25,
+      "tkk": 94.18,
+      "pengeluaran_per_kapita": 16990000,
+      "rata_upah": 3681072
+    }
+  },
+  {
+    "kabupaten": "Kota Pekalongan",
+    "cluster": 0,
+    "cluster_data": {
+      "penduduk": 321100,
+      "penduduk_bukan_bekerja": 59227,
+      "tpt": 4.91,
+      "tpak": 76.06,
+      "ipm": 77.22,
+      "tkk": 95.09,
+      "pengeluaran_per_kapita": 14547000,
+      "rata_upah": 2165098
+    }
+  },
+  {
+    "kabupaten": "Kota Tegal",
+    "cluster": 0,
+    "cluster_data": {
+      "penduduk": 285800,
+      "penduduk_bukan_bekerja": 67181,
+      "tpt": 5.88,
+      "tpak": 69.61,
+      "ipm": 77.43,
+      "tkk": 94.12,
+      "pengeluaran_per_kapita": 14358000,
+      "rata_upah": 2114984
+    }
+  }
+]

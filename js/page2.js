@@ -1,11 +1,12 @@
 /* ================================================================
    page2.js – Dashboard Ketenagakerjaan Jawa Tengah – Analisis Regional
+   Major revision: Map sebagai filter wilayah, 2 tren chart terpisah,
+   news section, insight template, radar explanation
    ================================================================ */
 
 'use strict';
 
 // ── FORMATTERS ──────────────────────────────────────────────────
-// Rp1.000 (tanpa spasi setelah Rp)
 const fRupiah = v => 'Rp' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v);
 const fNum    = v => new Intl.NumberFormat('id-ID').format(v);
 
@@ -17,38 +18,77 @@ Chart.register(ChartDataLabels);
 // ── CLUSTER META ────────────────────────────────────────────────
 const CLUSTER_META = {
   0: {
-    label:    'Klaster 0 – Kota Maju',
-    color:    '#1F3C88',
-    bg:       '#eff6ff',
-    mapColor: '#1F3C88',
-    desc:     'Kota dengan IPM tinggi, upah kompetitif, dan infrastruktur ketenagakerjaan matang.',
+    label:      'Klaster 0 – Wilayah Maju',
+    shortLabel: 'Wilayah Maju',
+    color:      '#1F3C88',
+    bg:         '#eff6ff',
+    mapColor:   '#1F3C88',
+    desc:       'Wilayah dengan IPM tinggi, upah kompetitif, dan infrastruktur ketenagakerjaan matang.',
   },
   1: {
-    label:    'Klaster 1 – Kabupaten Berkembang',
-    color:    '#F97316',
-    bg:       '#fff7ed',
-    mapColor: '#F97316',
-    desc:     'Kabupaten dengan populasi besar, TPT relatif tinggi, dan upah menengah ke bawah.',
+    label:      'Klaster 1 – Wilayah Berkembang',
+    shortLabel: 'Wilayah Berkembang',
+    color:      '#F97316',
+    bg:         '#fff7ed',
+    mapColor:   '#F97316',
+    desc:       'Wilayah dengan populasi besar, TPT relatif tinggi, dan upah menengah ke bawah.',
   },
   2: {
-    label:    'Klaster 2 – Kabupaten Produktif',
-    color:    '#3B82F6',
-    bg:       '#f0f9ff',
-    mapColor: '#3B82F6',
-    desc:     'Kabupaten dengan TPAK tinggi, TPT rendah-sedang, dan pertumbuhan ekonomi positif.',
+    label:      'Klaster 2 – Wilayah Produktif',
+    shortLabel: 'Wilayah Produktif',
+    color:      '#3B82F6',
+    bg:         '#f0f9ff',
+    mapColor:   '#3B82F6',
+    desc:       'Wilayah dengan TPAK tinggi, TPT rendah-sedang, dan pertumbuhan ekonomi positif.',
   },
 };
 
+// ── DUMMY NEWS ──────────────────────────────────────────────────
+const DUMMY_NEWS = [
+  {
+    source: 'BPS Jateng',
+    date:   '14 Apr 2025',
+    title:  'TPT Jawa Tengah Turun Menjadi 4,15% pada Februari 2025',
+    url:    'https://jateng.bps.go.id',
+  },
+  {
+    source: 'Kemnaker RI',
+    date:   '12 Apr 2025',
+    title:  'Program Kartu Prakerja Gelombang 68 Sasar 50.000 Pencari Kerja Baru',
+    url:    'https://kemnaker.go.id',
+  },
+  {
+    source: 'Kompas.com',
+    date:   '10 Apr 2025',
+    title:  'Upah Minimum Kota Semarang 2025 Naik 6,5% Menjadi Rp3,54 Juta',
+    url:    'https://www.kompas.com',
+  },
+  {
+    source: 'BPS Pusat',
+    date:   '5 Apr 2025',
+    title:  'Sakernas Feb 2025: Tingkat Partisipasi Angkatan Kerja Nasional Naik 0,3 Poin',
+    url:    'https://bps.go.id',
+  },
+  {
+    source: 'Joglosemar',
+    date:   '2 Apr 2025',
+    title:  'Klaster Industri Kudus Serap 12.000 Tenaga Kerja Baru di Semester I 2025',
+    url:    '#',
+  },
+];
+
 // ── MUTABLE STATE ───────────────────────────────────────────────
-const charts = { tren: null, upah: null, pasar: null, radar: null };
-let   leafletMap = null;
-let   globalPage2 = null;
+const charts = { tpak: null, tpt: null, upah: null, pasar: null, radar: null };
+let leafletMap      = null;
+let globalPage2     = null;
+let selectedWilayah = 'Jawa Tengah';
+let selectedLayer   = null;   // currently highlighted Leaflet layer
+let geojsonLayer    = null;   // full L.geoJSON layer reference
 
 /* ================================================================
    INIT
    ================================================================ */
 function initDashboard() {
-  // Load data.json + cluster_kabupaten.json (source of truth for clusters)
   Promise.all([
     fetch('data.json').then(r => {
       if (!r.ok) throw new Error('Gagal mengambil data.json (HTTP ' + r.status + ')');
@@ -60,85 +100,125 @@ function initDashboard() {
     }),
   ])
   .then(([data, clusterData]) => {
-    // Override kluster dari file cluster yang sudah dikoreksi
     data.page2.kluster = clusterData;
     globalPage2 = data.page2;
-
-    populateDropdown(data.page2);
     buildLayout();
-    renderAll(data.page2, 'Jawa Tengah');
+    renderAll(data.page2, selectedWilayah);
     initMap(clusterData);
-
-    document.getElementById('filterWilayah').addEventListener('change', function () {
-      renderAll(globalPage2, this.value);
-    });
   })
   .catch(err => {
     document.getElementById('mainContent').innerHTML = `
       <div style="text-align:center;padding:5rem 2rem;color:#ef4444">
         <p style="font-size:1.2rem;font-weight:700">Gagal Memuat Data</p>
         <p style="margin-top:.6rem;color:#94a3b8;font-size:.88rem">${err.message}</p>
-        <p style="margin-top:.4rem;color:#94a3b8;font-size:.8rem">Pastikan halaman dibuka melalui server lokal (bukan file://)</p>
+        <p style="margin-top:.4rem;color:#94a3b8;font-size:.8rem">
+          Pastikan halaman dibuka melalui server lokal (bukan file://)
+        </p>
       </div>`;
   });
 }
 
 /* ================================================================
-   DROPDOWN
+   MAP SELECTION RESET  (called by inline onclick in HTML)
    ================================================================ */
-function populateDropdown(page2) {
-  const sel = document.getElementById('filterWilayah');
-  page2.tren.forEach(t => {
-    const opt       = document.createElement('option');
-    opt.value       = t.kabupaten;
-    opt.textContent = t.kabupaten;
-    if (t.kabupaten === 'Jawa Tengah') opt.selected = true;
-    sel.appendChild(opt);
-  });
+function resetMapSelection() {
+  selectedWilayah = 'Jawa Tengah';
+  document.getElementById('selectedRegionBadge').textContent = 'Jawa Tengah (Provinsi)';
+  document.getElementById('resetMapBtn').style.display = 'none';
+
+  if (geojsonLayer) geojsonLayer.resetStyle();
+  selectedLayer = null;
+
+  if (leafletMap) leafletMap.flyTo([-7.15, 110.14], 8, { duration: 0.8 });
+  renderAll(globalPage2, 'Jawa Tengah');
 }
 
 /* ================================================================
-   LAYOUT SCAFFOLD
+   BUILD LAYOUT
    ================================================================ */
 function buildLayout() {
   document.getElementById('loadingSpinner').remove();
 
+  // ── News bar – injected ABOVE mainContent ──
+  if (!document.getElementById('newsBar')) {
+    const newsBar = document.createElement('div');
+    newsBar.id        = 'newsBar';
+    newsBar.className = 'news-bar';
+    newsBar.innerHTML = `
+      <div class="news-bar-label"><span class="live-dot"></span>BERITA</div>
+      <div class="news-list">
+        ${DUMMY_NEWS.map(n => `
+          <a href="${n.url}" target="_blank" rel="noopener" class="news-card">
+            <div class="news-card-meta">${n.source}&nbsp;&middot;&nbsp;${n.date}</div>
+            <div class="news-card-title">${n.title}</div>
+          </a>
+        `).join('')}
+      </div>`;
+    document.getElementById('mainContent').before(newsBar);
+  }
+
   document.getElementById('mainContent').innerHTML = `
 
-    <!-- Insight -->
-    <div class="insight-box" id="insightBox">
-      <div class="insight-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-      </div>
-      <div><h3>Insight Otomatis</h3><p id="insightText">Memuat insight...</p></div>
-    </div>
-
-    <!-- Row 1: Tren (radio TPAK/TPT) + Upah -->
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header">
-          <h3>Tren Ketenagakerjaan (2017–2025)</h3>
-          <div class="radio-group" id="trenRadioGroup">
-            <label><input type="radio" name="tren" value="tpak" id="r-tpak" checked>TPAK</label>
-            <label><input type="radio" name="tren" value="tpt"  id="r-tpt">TPT</label>
+    <!-- Row 0: Peta (filter) Full Width -->
+    <div class="grid-full">
+      <div class="card map-card" style="min-height:500px;">
+        <div class="card-header" style="justify-content:center;flex-direction:column;gap:.5rem;align-items:center">
+          <h3>Peta Klaster Produktivitas Kabupaten/Kota Jawa Tengah</h3>
+          <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center">
+            <span id="selectedRegionBadge" class="region-badge">Jawa Tengah (Provinsi)</span>
+            <button id="resetMapBtn" class="reset-map-btn" style="display:none"
+                    onclick="resetMapSelection()">&#8592; Reset ke Jawa Tengah</button>
           </div>
         </div>
-        <div class="chart-wrap h-72"><canvas id="chartTren"></canvas></div>
+        <div id="mapCluster" style="height: 440px;"></div>
+        <div class="map-legend">
+          <span class="map-legend-title">Legenda:</span>
+          <div class="map-legend-items" id="mapLegendItems"></div>
+        </div>
       </div>
+    </div>
+
+    <!-- Row 0.5: Insight Full Width -->
+    <div class="grid-full">
+      <div class="insight-box" id="insightBox" style="margin-bottom: 1.5rem;">
+        <div class="insight-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <h3>Insight</h3>
+          <p id="insightText" style="line-height:1.8;font-size:.87rem">Memuat insight...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 1: TPAK + TPT terpisah -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header" style="justify-content:center">
+          <h3>Tren TPAK (2017–2025)</h3>
+        </div>
+        <div class="chart-wrap h-72"><canvas id="chartTPAK"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header" style="justify-content:center">
+          <h3>Tren TPT (2017–2025)</h3>
+        </div>
+        <div class="chart-wrap h-72"><canvas id="chartTPT"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Row 2: Upah + Pasar Kerja -->
+    <div class="grid-2">
       <div class="card">
         <div class="card-header" style="justify-content:center">
           <h3>Perbandingan Upah Formal dan Informal</h3>
         </div>
         <div class="chart-wrap h-72"><canvas id="chartUpah"></canvas></div>
       </div>
-    </div>
-
-    <!-- Row 2: Pasar Kerja + Klaster -->
-    <div class="grid-2">
       <div class="card">
         <div class="card-header">
           <h3>Proporsi Gender Pasar Kerja</h3>
@@ -150,66 +230,56 @@ function buildLayout() {
         <div class="chart-wrap h-64"><canvas id="chartPasar"></canvas></div>
         <div id="pasarStatBox" class="pasar-stat-box"></div>
       </div>
-
-      <div class="card">
-        <div class="card-header" style="justify-content:center">
-          <h3 style="font-size:1.05rem">Analisis Klaster Produktivitas</h3>
-        </div>
-        <div id="klasterContent">Memuat...</div>
-      </div>
     </div>
 
-    <!-- Row 3: Radar -->
-    <div class="grid-full">
-      <div class="card">
-        <div class="card-header" style="justify-content:center">
-          <h3>Profil Performa Wilayah terhadap Rata-rata Klaster</h3>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:2rem;align-items:stretch">
-          <div class="chart-wrap h-96" style="flex:1;min-width:260px"><canvas id="chartRadar"></canvas></div>
-          <div id="radarLegend" style="flex:0 0 300px;display:flex;flex-direction:column;justify-content:center"></div>
+    <!-- Row 3: Radar Chart & Klaster (Hidden for unsupported regions) -->
+    <div id="klasterAndRadarRegion" style="display: none;">
+      <div class="grid-full">
+        <div class="card">
+          <div class="card-header" style="justify-content:center">
+            <h3 style="font-size:1.05rem">Analisis Klaster Produktivitas</h3>
+          </div>
+          <div id="klasterContent">Memuat...</div>
         </div>
       </div>
-    </div>
 
-    <!-- Row 4: Peta Choropleth -->
-    <div class="grid-full">
-      <div class="card">
-        <div class="card-header" style="justify-content:center">
-          <h3>Peta Klaster Produktivitas Kabupaten/Kota Jawa Tengah</h3>
-        </div>
-        <div id="mapCluster"></div>
-        <div class="map-legend">
-          <span class="map-legend-title">Legenda:</span>
-          <div class="map-legend-items" id="mapLegendItems"></div>
+      <div class="grid-full">
+        <div class="card">
+          <div class="card-header" style="justify-content:center">
+            <h3>Profil Performa Wilayah terhadap Rata-rata Klaster</h3>
+          </div>
+          <p class="radar-description" style="text-align:center;">
+            Grafik di bawah ini memvisualisasikan bagaimana performa indikator ketenagakerjaan di wilayah terpilih 
+            jika dibandingkan dengan kondisi rata-rata pada klaster yang sama. Nilai <strong>100%</strong> 
+            merepresentasikan titik rata-rata klaster.&nbsp;
+            <span style="color:#16a34a;font-weight:600">&#9650; &gt;100%</span> menandakan performa di atas rata-rata, sedangkan&nbsp;
+            <span style="color:#d97706;font-weight:600">&#9660; &lt;100%</span> menandakan di bawah rata-rata.&nbsp;
+            Khusus pada dimensi <em>Efisiensi Ketenagakerjaan</em>, skor pengukuran yang lebih tinggi 
+            mengindikasikan Tingkat Pengangguran Terbuka (TPT) yang lebih rendah (kondisi optimal).
+          </p>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1.5rem;">
+            <div class="chart-wrap" style="width:100%; max-width:860px; height:650px;">
+              <canvas id="chartRadar"></canvas>
+            </div>
+            <div id="radarLegend" style="width:100%"></div>
+          </div>
         </div>
       </div>
     </div>
   `;
 
-  // Radio: TPAK/TPT toggle for tren chart
-  document.querySelectorAll('input[name="tren"]').forEach(r => {
-    r.addEventListener('change', () => {
-      if (!globalPage2) return;
-      const wilayah  = document.getElementById('filterWilayah').value;
-      const trenItem = globalPage2.tren.find(t => t.kabupaten === wilayah);
-      if (trenItem) renderChartTren(trenItem, r.value);
-    });
-  });
-
-  // Radio: Lowongan/Pencari for pasar chart
+  // Radio event for pasar chart
   document.querySelectorAll('input[name="pasar"]').forEach(r => {
     r.addEventListener('change', () => {
       if (!globalPage2) return;
-      const wilayah = document.getElementById('filterWilayah').value;
-      const kab     = globalPage2.kabupaten.find(k => k.nama === wilayah);
+      const kab = globalPage2.kabupaten.find(k => k.nama === selectedWilayah);
       if (kab) renderChartPasar(kab, r.value);
     });
   });
 }
 
 /* ================================================================
-   RENDER ALL  (called on dropdown change)
+   RENDER ALL
    ================================================================ */
 function renderAll(page2, wilayah) {
   const trenItem    = page2.tren.find(t => t.kabupaten === wilayah);
@@ -220,78 +290,71 @@ function renderAll(page2, wilayah) {
   if (!kabItem)  { console.error('Data kabupaten tidak ditemukan untuk:', wilayah); return; }
 
   updateInsight(trenItem, kabItem, klusterItem, wilayah);
-  const trenRadio = document.querySelector('input[name="tren"]:checked');
-  renderChartTren(trenItem, trenRadio?.value || 'tpak');
+  renderChartTPAK(trenItem);
+  renderChartTPT(trenItem);
   renderChartUpah(kabItem, wilayah, page2);
 
   const mode = document.querySelector('input[name="pasar"]:checked')?.value || 'lowongan';
   renderChartPasar(kabItem, mode);
 
   if (klusterItem) {
+    document.getElementById('klasterAndRadarRegion').style.display = 'block';
     renderKlasterCard(klusterItem, page2.kluster);
     renderChartRadar(klusterItem, page2.kluster);
   } else {
-    document.getElementById('klasterContent').innerHTML =
-      `<p style="color:var(--grey);margin-top:1rem;font-size:.88rem">Data klaster tidak tersedia untuk ${wilayah}.</p>`;
+    document.getElementById('klasterAndRadarRegion').style.display = 'none';
+    if (charts.radar) { charts.radar.destroy(); charts.radar = null; }
   }
 }
 
 /* ================================================================
-   INSIGHT
+   INSIGHT  (template format)
    ================================================================ */
 function updateInsight(tren, kab, kluster, wilayah) {
   const latest    = tren.data[tren.data.length - 1];
   const earliest  = tren.data[0];
-  const tptDelta  = +(latest.tpt  - earliest.tpt).toFixed(2);
   const tpakDelta = +(latest.tpak - earliest.tpak).toFixed(2);
+  const tptDelta  = +(latest.tpt  - earliest.tpt).toFixed(2);
   const gapUpah   = kab ? kab.upah.formal - kab.upah.informal : 0;
 
-  const OG = 'color:#fb923c';   // orange accent for dark insight bg
-
-  const tptDir  = tptDelta < 0
-    ? `turun <strong style="${OG}">${Math.abs(tptDelta)} poin persentase</strong> (membaik)`
-    : `naik <strong style="${OG}">${tptDelta} poin persentase</strong> (perlu perhatian)`;
+  const OG = 'color:#fb923c;font-weight:600';
 
   const tpakDir = tpakDelta >= 0
-    ? `meningkat <strong style="${OG}">${tpakDelta} poin</strong>`
-    : `turun <strong style="${OG}">${Math.abs(tpakDelta)} poin</strong>`;
+    ? `meningkat sebesar <strong style="${OG}">${Math.abs(tpakDelta)} persen</strong>`
+    : `turun sebesar <strong style="${OG}">${Math.abs(tpakDelta)} persen</strong>`;
+
+  const tptDir = tptDelta < 0
+    ? `turun sebesar <strong style="${OG}">${Math.abs(tptDelta)} persen</strong>, yang merupakan tren positif`
+    : `meningkat sebesar <strong style="${OG}">${tptDelta} persen</strong>, sehingga perlu mendapatkan perhatian`;
 
   const klInfo = kluster
-    ? ` Berdasarkan analisis klaster, wilayah ini masuk dalam <strong style="${OG}">${CLUSTER_META[kluster.cluster].label}</strong>.`
+    ? ` Berdasarkan analisis klaster, wilayah ini termasuk dalam <strong style="${OG}">${CLUSTER_META[kluster.cluster].label}</strong>, yaitu daerah ${CLUSTER_META[kluster.cluster].shortLabel.toLowerCase()}.`
     : '';
 
   document.getElementById('insightText').innerHTML =
-    `<strong>${wilayah}</strong>: Dalam kurun 2017–2025, TPT ${tptDir}, sementara TPAK ${tpakDir}. ` +
-    `Rata-rata upah formal (<strong style="${OG}">${fRupiah(kab?.upah?.formal || 0)}</strong>) lebih tinggi ` +
-    `<strong style="${OG}">${fRupiah(gapUpah)}</strong> dibanding upah informal (<strong style="${OG}">${fRupiah(kab?.upah?.informal || 0)}</strong>).${klInfo}`;
+    `Dalam kurun waktu 2017–2025, TPAK ${tpakDir}, sementara TPT ${tptDir}. ` +
+    `Rata-rata upah di sektor formal (<strong style="${OG}">${fRupiah(kab?.upah?.formal || 0)}</strong>) ` +
+    `lebih tinggi <strong style="${OG}">${fRupiah(gapUpah)}</strong> ` +
+    `dibanding upah di sektor informal (<strong style="${OG}">${fRupiah(kab?.upah?.informal || 0)}</strong>).` +
+    klInfo;
 }
 
 /* ================================================================
-   CHART 1 – TREN KETENAGAKERJAAN (LINE, SINGLE AXIS)
-   - variabel: 'tpak' (default) atau 'tpt'
-   - Warna dan label menyesuaikan pilihan radio
+   CHART 1a – TREN TPAK
    ================================================================ */
-function renderChartTren(trenItem, variabel = 'tpak') {
-  if (charts.tren) { charts.tren.destroy(); charts.tren = null; }
-
-  const isTpak = variabel === 'tpak';
-  const color   = isTpak ? '#1F3C88' : '#F97316';
-  const bgColor = isTpak ? 'rgba(31,60,136,.1)' : 'rgba(249,115,22,.08)';
-  const label   = isTpak ? 'TPAK (%)' : 'TPT (%)';
-  const data    = trenItem.data.map(d => isTpak ? d.tpak : d.tpt);
-
-  const ctx = document.getElementById('chartTren').getContext('2d');
-
-  charts.tren = new Chart(ctx, {
+function renderChartTPAK(trenItem) {
+  if (charts.tpak) { charts.tpak.destroy(); charts.tpak = null; }
+  const ctx = document.getElementById('chartTPAK').getContext('2d');
+  charts.tpak = new Chart(ctx, {
     type: 'line',
     data: {
       labels: trenItem.data.map(d => d.tahun),
       datasets: [{
-        label,
-        data,
-        borderColor: color,
-        backgroundColor: bgColor,
-        pointBackgroundColor: color,
+        label: 'TPAK (%)',
+        data:  trenItem.data.map(d => d.tpak),
+        borderColor:         '#1F3C88',
+        backgroundColor:     'rgba(31,60,136,.1)',
+        pointBackgroundColor:'#1F3C88',
         pointRadius: 4, pointHoverRadius: 7,
         borderWidth: 2.5, fill: true, tension: .35,
       }],
@@ -301,12 +364,52 @@ function renderChartTren(trenItem, variabel = 'tpak') {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         datalabels: { display: false },
-        legend: { display: false },
-        tooltip: { callbacks: { label: c => `${label}: ${c.parsed.y}%` } },
+        legend:     { display: false },
+        tooltip:    { callbacks: { label: c => `TPAK: ${c.parsed.y}%` } },
       },
       scales: {
         y: {
-          title: { display: true, text: label, color, font: { weight: '600' } },
+          title: { display: true, text: 'TPAK (%)', color: '#1F3C88', font: { weight: '600' } },
+          grid:  { color: '#f1f5f9' },
+          ticks: { callback: v => v + '%' },
+        },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+/* ================================================================
+   CHART 1b – TREN TPT
+   ================================================================ */
+function renderChartTPT(trenItem) {
+  if (charts.tpt) { charts.tpt.destroy(); charts.tpt = null; }
+  const ctx = document.getElementById('chartTPT').getContext('2d');
+  charts.tpt = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: trenItem.data.map(d => d.tahun),
+      datasets: [{
+        label: 'TPT (%)',
+        data:  trenItem.data.map(d => d.tpt),
+        borderColor:         '#F97316',
+        backgroundColor:     'rgba(249,115,22,.08)',
+        pointBackgroundColor:'#F97316',
+        pointRadius: 4, pointHoverRadius: 7,
+        borderWidth: 2.5, fill: true, tension: .35,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        datalabels: { display: false },
+        legend:     { display: false },
+        tooltip:    { callbacks: { label: c => `TPT: ${c.parsed.y}%` } },
+      },
+      scales: {
+        y: {
+          title: { display: true, text: 'TPT (%)', color: '#F97316', font: { weight: '600' } },
           grid:  { color: '#f1f5f9' },
           ticks: { callback: v => v + '%' },
         },
@@ -318,10 +421,6 @@ function renderChartTren(trenItem, variabel = 'tpak') {
 
 /* ================================================================
    CHART 2 – UPAH FORMAL vs INFORMAL (BAR)
-   - Destroy + recreate → label selalu benar
-   - beginAtZero: true  → skala adil dari 0
-   - borderRadius: atas rounded, bawah kotak
-   - 4-entry custom legend: Formal (navy) + Informal (orange) × 2 wilayah
    ================================================================ */
 function renderChartUpah(kabItem, wilayah, page2) {
   if (charts.upah) { charts.upah.destroy(); charts.upah = null; }
@@ -333,31 +432,26 @@ function renderChartUpah(kabItem, wilayah, page2) {
   const provInformal = provData?.upah?.informal ?? 0;
   const isProvince   = (wilayah === 'Jawa Tengah');
 
-  // borderRadius: hanya sudut atas yang rounded
   const radiusTop = { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 };
 
   const datasets = [
     {
       label: wilayah,
-      data: [formal, informal],
-      backgroundColor: ['#1F3C88', '#F97316'],   // Formal=navy, Informal=orange
-      borderRadius: radiusTop,
-      borderSkipped: false,
+      data:  [formal, informal],
+      backgroundColor: ['#1F3C88', '#F97316'],
+      borderRadius: radiusTop, borderSkipped: false,
     },
   ];
-
   if (!isProvince) {
     datasets.push({
       label: 'Jawa Tengah (Provinsi)',
-      data: [provFormal, provInformal],
+      data:  [provFormal, provInformal],
       backgroundColor: ['rgba(31,60,136,.28)', 'rgba(249,115,22,.28)'],
-      borderRadius: radiusTop,
-      borderSkipped: false,
+      borderRadius: radiusTop, borderSkipped: false,
     });
   }
 
   const ctx = document.getElementById('chartUpah').getContext('2d');
-
   charts.upah = new Chart(ctx, {
     type: 'bar',
     data: { labels: ['Formal', 'Informal'], datasets },
@@ -366,19 +460,15 @@ function renderChartUpah(kabItem, wilayah, page2) {
       plugins: {
         datalabels: { display: false },
         legend: {
-          position: 'bottom',   // legend di bawah chart
+          position: 'bottom',
           labels: {
-            usePointStyle: true,
-            pointStyle:    'rectRounded',
-            boxWidth:      14,
-            boxHeight:     14,
-            padding:       22,   // breathing room between legend and chart
-            // 4 entri legend: Formal-solid, Informal-solid, Formal-pudar, Informal-pudar
+            usePointStyle: true, pointStyle: 'rectRounded',
+            boxWidth: 14, boxHeight: 14, padding: 22,
             generateLabels: chart => {
-              const ds       = chart.data.datasets;
-              const entries  = [
-                { text: `Formal – ${ds[0].label}`,   fill: '#1F3C88',             ds: 0 },
-                { text: `Informal – ${ds[0].label}`, fill: '#F97316',             ds: 0 },
+              const ds      = chart.data.datasets;
+              const entries = [
+                { text: `Formal – ${ds[0].label}`,   fill: '#1F3C88',            ds: 0 },
+                { text: `Informal – ${ds[0].label}`, fill: '#F97316',            ds: 0 },
               ];
               if (ds[1]) {
                 entries.push(
@@ -387,11 +477,8 @@ function renderChartUpah(kabItem, wilayah, page2) {
                 );
               }
               return entries.map(e => ({
-                text:         e.text,
-                fillStyle:    e.fill,
-                strokeStyle:  'transparent',
-                hidden:       false,
-                datasetIndex: e.ds,
+                text: e.text, fillStyle: e.fill,
+                strokeStyle: 'transparent', hidden: false, datasetIndex: e.ds,
               }));
             },
           },
@@ -413,7 +500,7 @@ function renderChartUpah(kabItem, wilayah, page2) {
         },
         x: { grid: { display: false } },
       },
-      layout: { padding: { bottom: 8 } },   // breathing room above bottom legend
+      layout: { padding: { bottom: 8 } },
     },
   });
 }
@@ -429,16 +516,15 @@ function renderChartPasar(kabItem, mode) {
   const pr = mode === 'lowongan'
     ? kabItem.lowongan_kerja.perempuan : kabItem.pencari_kerja.perempuan;
 
-  const total     = lk + pr;
-  const lkPct     = lk / total * 100;
-  const prPct     = pr / total * 100;
-  const diffPct   = Math.abs(lkPct - prPct).toFixed(1);
-  const dominant  = lk > pr ? 'Laki-laki' : 'Perempuan';
-  const minority  = lk > pr ? 'Perempuan' : 'Laki-laki';
-  const domColor  = lk > pr ? '#1F3C88'   : '#F97316';
-  const modeLabel = mode === 'lowongan' ? 'Lowongan Kerja Terdaftar' : 'Pencari Kerja Terdaftar';
+  const total    = lk + pr;
+  const lkPct    = lk / total * 100;
+  const prPct    = pr / total * 100;
+  const diffPct  = Math.abs(lkPct - prPct).toFixed(1);
+  const dominant = lk > pr ? 'Laki-laki' : 'Perempuan';
+  const minority = lk > pr ? 'Perempuan' : 'Laki-laki';
+  const domColor = lk > pr ? '#1F3C88'   : '#F97316';
+  const modeLabel= mode === 'lowongan' ? 'Lowongan Kerja Terdaftar' : 'Pencari Kerja Terdaftar';
 
-  // ── Stat box ──
   const statBox = document.getElementById('pasarStatBox');
   if (statBox) {
     statBox.innerHTML = `
@@ -458,7 +544,6 @@ function renderChartPasar(kabItem, mode) {
   }
 
   const ctx = document.getElementById('chartPasar').getContext('2d');
-
   charts.pasar = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -466,8 +551,7 @@ function renderChartPasar(kabItem, mode) {
       datasets: [{
         data: [lk, pr],
         backgroundColor: ['#1F3C88', '#F97316'],
-        borderWidth: 0,
-        hoverOffset: 8,
+        borderWidth: 0, hoverOffset: 8,
       }],
     },
     options: {
@@ -475,24 +559,15 @@ function renderChartPasar(kabItem, mode) {
       cutout: '65%',
       plugins: {
         datalabels: {
-          color: '#fff',
-          font: { weight: 'bold', size: 12 },
+          color: '#fff', font: { weight: 'bold', size: 12 },
           formatter: v => `${(v / total * 100).toFixed(1)}%`,
         },
         title: {
-          display: true,
-          text: modeLabel,
-          color: '#1e293b',
-          font: { size: 12, weight: '600' },
-          padding: { bottom: 6 },
+          display: true, text: modeLabel,
+          color: '#1e293b', font: { size: 12, weight: '600' }, padding: { bottom: 6 },
         },
         legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
-        tooltip: {
-          callbacks: {
-            // Ringkas: hanya jumlah orang, label sudah tampil di header tooltip
-            label: c => `${fNum(c.raw)} orang`,
-          },
-        },
+        tooltip: { callbacks: { label: c => `${fNum(c.raw)} orang` } },
       },
     },
   });
@@ -502,10 +577,10 @@ function renderChartPasar(kabItem, mode) {
    KLASTER CARD
    ================================================================ */
 function renderKlasterCard(klusterItem, allKluster) {
-  const c    = klusterItem.cluster;
-  const meta = CLUSTER_META[c];
-  const cd   = klusterItem.cluster_data;
-  const peers= allKluster.filter(k => k.cluster === c).map(k => k.kabupaten);
+  const c     = klusterItem.cluster;
+  const meta  = CLUSTER_META[c];
+  const cd    = klusterItem.cluster_data;
+  const peers = allKluster.filter(k => k.cluster === c).map(k => k.kabupaten);
 
   document.getElementById('klasterContent').innerHTML = `
     <div class="cluster-banner" style="background:${meta.bg}">
@@ -551,7 +626,7 @@ function renderKlasterCard(klusterItem, allKluster) {
 }
 
 /* ================================================================
-   CHART 4 – RADAR
+   CHART 4 – RADAR (enhanced explanation sidebar)
    ================================================================ */
 function renderChartRadar(klusterItem, allKluster) {
   if (charts.radar) { charts.radar.destroy(); charts.radar = null; }
@@ -569,40 +644,38 @@ function renderChartRadar(klusterItem, allKluster) {
 
   const norm = (val, a) => Math.min(Math.round(val / a * 100), 150);
 
-  const labels = [
-    'TPAK',
-    'IPM',
-    'Pengeluaran\nPer Kapita',
-    'Upah Rata-rata',
-    'Efisiensi\nKetenagakerjaan',
-  ];
   const values = [
-    norm(cd.tpak,                    avg.tpak),
-    norm(cd.ipm,                     avg.ipm),
-    norm(cd.pengeluaran_per_kapita,  avg.pengeluaran),
-    norm(cd.rata_upah,               avg.upah),
-    norm(100 - cd.tpt,               100 - avg.tpt),
+    norm(cd.tpak,                   avg.tpak),
+    norm(cd.ipm,                    avg.ipm),
+    norm(cd.pengeluaran_per_kapita, avg.pengeluaran),
+    norm(cd.rata_upah,              avg.upah),
+    norm(100 - cd.tpt,              100 - avg.tpt),
   ];
 
   const ctx = document.getElementById('chartRadar').getContext('2d');
-
   charts.radar = new Chart(ctx, {
     type: 'radar',
     data: {
-      labels,
+      labels: [
+        'TPAK\n(Partisipasi\nAngkatan Kerja)',
+        'IPM\n(Indeks\nPembangunan)',
+        'Pengeluaran\nPer Kapita',
+        'Upah\nRata-rata',
+        'Efisiensi\nKetenagakerjaan\n(TPT Rendah)',
+      ],
       datasets: [
         {
           label: klusterItem.kabupaten,
-          data: values,
-          borderColor: '#1F3C88',
-          backgroundColor: 'rgba(31,60,136,.15)',
-          pointBackgroundColor: '#1F3C88',
+          data:  values,
+          borderColor:         '#1F3C88',
+          backgroundColor:     'rgba(31,60,136,.15)',
+          pointBackgroundColor:'#1F3C88',
           borderWidth: 2.5, pointRadius: 5,
         },
         {
-          label: 'Rata-rata Klaster',
-          data: [100, 100, 100, 100, 100],
-          borderColor: '#94A3B8',
+          label: 'Rata-rata Klaster (100%)',
+          data:  [100, 100, 100, 100, 100],
+          borderColor:     '#94A3B8',
           backgroundColor: 'rgba(148,163,184,.08)',
           pointBackgroundColor: '#94A3B8',
           borderWidth: 1.5, borderDash: [5, 4], pointRadius: 3,
@@ -613,10 +686,15 @@ function renderChartRadar(klusterItem, allKluster) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         datalabels: { display: false },
-        legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } },
+        legend:     { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } },
         tooltip: {
           callbacks: {
-            label: c => `${c.dataset.label}: ${c.raw}% dari rata-rata klaster`,
+            label: c => {
+              const label = c.dataset.label;
+              const score = c.raw;
+              const status = score >= 100 ? '▲ di atas rata-rata klaster' : '▼ di bawah rata-rata klaster';
+              return `${label}: ${score}% (${status})`;
+            },
           },
         },
       },
@@ -624,137 +702,157 @@ function renderChartRadar(klusterItem, allKluster) {
         r: {
           beginAtZero: true, min: 0, max: 150,
           ticks: { stepSize: 50, callback: v => v + '%' },
-          pointLabels: { font: { size: 11, weight: '600' }, color: '#475569' },
-          grid: { color: '#e2e8f0' },
-          angleLines: { color: '#e2e8f0' },
+          pointLabels: { font: { size: 10, weight: '600' }, color: '#475569' },
+          grid:        { color: '#e2e8f0' },
+          angleLines:  { color: '#e2e8f0' },
         },
       },
     },
   });
 
-  // Sidebar legend — diperbesar
+  // ── Enhanced sidebar ──
+  const RADAR_DIMS = [
+    {
+      label: 'TPAK',
+      fullLabel: 'Partisipasi Angkatan Kerja',
+      value: cd.tpak + '%',
+      avg:   avg.tpak.toFixed(2) + '%',
+      score: values[0],
+      color: '#1F3C88',
+      desc:  'Persen penduduk usia kerja yang aktif bekerja atau mencari kerja.',
+    },
+    {
+      label: 'IPM',
+      fullLabel: 'Indeks Pembangunan Manusia',
+      value: String(cd.ipm),
+      avg:   avg.ipm.toFixed(2),
+      score: values[1],
+      color: '#3B82F6',
+      desc:  'Indeks komposit: harapan hidup, pendidikan, dan standar hidup.',
+    },
+    {
+      label: 'Pengeluaran/Kapita',
+      fullLabel: 'Daya Beli Masyarakat',
+      value: fRupiah(cd.pengeluaran_per_kapita),
+      avg:   fRupiah(Math.round(avg.pengeluaran)),
+      score: values[2],
+      color: '#1F3C88',
+      desc:  'Rata-rata pengeluaran per kapita per tahun – proksi daya beli.',
+    },
+    {
+      label: 'Upah Rata-rata',
+      fullLabel: 'Tingkat Upah Wilayah',
+      value: fRupiah(cd.rata_upah),
+      avg:   fRupiah(Math.round(avg.upah)),
+      score: values[3],
+      color: '#F97316',
+      desc:  'Rata-rata upah seluruh sektor (formal + informal) di wilayah ini.',
+    },
+    {
+      label: 'Efisiensi (TPT)',
+      fullLabel: 'Tingkat Pengangguran Terbuka',
+      value: cd.tpt + '%',
+      avg:   avg.tpt.toFixed(2) + '%',
+      score: values[4],
+      color: '#F97316',
+      desc:  'Skor invers TPT: makin tinggi skor, makin rendah pengangguran (lebih baik).',
+    },
+  ];
+
   document.getElementById('radarLegend').innerHTML = `
     <p style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;
-              letter-spacing:.08em;margin-bottom:1rem">
-      Nilai Aktual – ${klusterItem.kabupaten}
+              letter-spacing:.08em;margin-bottom:1rem;text-align:center;">
+      Detail Performa – ${klusterItem.kabupaten}
     </p>
-    ${[
-      ['TPAK',              cd.tpak + '%',                    '#1F3C88'],
-      ['TPT',               cd.tpt  + '%',                    '#F97316'],
-      ['IPM',               String(cd.ipm),                   '#3B82F6'],
-      ['Pengeluaran/Kapita',fRupiah(cd.pengeluaran_per_kapita),'#1F3C88'],
-      ['Rata-rata Upah',    fRupiah(cd.rata_upah),            '#F97316'],
-      ['Penduduk',          fNum(cd.penduduk) + ' jiwa',      '#94A3B8'],
-    ].map(([l, v, c]) => `
-      <div style="display:flex;justify-content:space-between;align-items:center;
-                  padding:.75rem 1rem;border-radius:.65rem;margin-bottom:.5rem;
-                  background:#f8fafc;border:1px solid #e2e8f0">
-        <span style="font-size:.84rem;color:#475569;font-weight:500">${l}</span>
-        <span style="font-size:.92rem;font-weight:700;color:${c};margin-left:.75rem">${v}</span>
-      </div>`).join('')}
-  `;
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1rem;">
+      ${RADAR_DIMS.map(d => {
+        const above  = d.score >= 100;
+        const badge  = above
+          ? `<span style="background:#dcfce7;color:#16a34a;font-size:.67rem;padding:.12rem .4rem;border-radius:99px;font-weight:700;white-space:nowrap">▲ Di atas rata-rata</span>`
+          : `<span style="background:#fef3c7;color:#d97706;font-size:.67rem;padding:.12rem .4rem;border-radius:99px;font-weight:700;white-space:nowrap">▼ Di bawah rata-rata</span>`;
+        const bar = `
+          <div style="margin:.3rem 0;background:#e2e8f0;border-radius:4px;height:5px;overflow:hidden">
+            <div style="height:100%;width:${Math.min(d.score, 150)/1.5}%;
+                        background:${above ? '#1F3C88' : '#F97316'};border-radius:4px;
+                        transition:width .5s ease"></div>
+          </div>`;
+        return `
+          <div style="padding:.7rem .9rem;border-radius:.65rem;margin-bottom:0;
+                      background:#f8fafc;border:1px solid #e2e8f0;display:flex;flex-direction:column;justify-content:space-between;">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
+                <div>
+                  <div style="font-size:.82rem;color:#1e293b;font-weight:700">${d.label}</div>
+                  <div style="font-size:.72rem;color:#94a3b8">${d.fullLabel}</div>
+                </div>
+                <span style="font-size:.9rem;font-weight:700;color:${d.color};white-space:nowrap">${d.value}</span>
+              </div>
+              ${bar}
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.25rem">
+                <span style="font-size:.7rem;color:#94a3b8">Rata-rata: ${d.avg} &nbsp;|&nbsp; Skor: ${d.score}%</span>
+                ${badge}
+              </div>
+            </div>
+            <div style="font-size:.7rem;color:#94a3b8;margin-top:.6rem;font-style:italic">${d.desc}</div>
+          </div>`;
+      }).join('')}
+    </div>`;
 }
 
 /* ================================================================
-   MAP – CHOROPLETH (Leaflet.js)
+   MAP – CHOROPLETH + CLICK FILTER (Leaflet.js)
    ================================================================ */
 function initMap(klusterData) {
-  // Build lookup: kabupaten-name (lowercase) → cluster item
   const clusterLookup = {};
   klusterData.forEach(k => {
     clusterLookup[k.kabupaten.toLowerCase()] = k;
   });
 
-  // Init Leaflet centred on Jawa Tengah
   leafletMap = L.map('mapCluster', {
-    center:            [-7.15, 110.14],
-    zoom:              8,
-    zoomControl:       true,
-    scrollWheelZoom:   false,
-    maxZoom:           12,
+    center: [-7.15, 110.14], zoom: 8,
+    zoomControl: true, scrollWheelZoom: false, maxZoom: 12,
   });
 
-  // Muted CartoDB base tiles
   L.tileLayer(
     'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
     {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' +
         ' &copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom:    12,
+      subdomains: 'abcd', maxZoom: 12,
     }
   ).addTo(leafletMap);
 
-  // Attempt to load GeoJSON (root level — GitHub Pages friendly)
   fetch('jateng.geojson')
-    .then(r => {
-      if (!r.ok) throw new Error('GeoJSON belum tersedia');
-      return r.json();
-    })
-    .then(geojson => {
-      renderChoropleth(geojson, klusterData, clusterLookup);
-    })
-    .catch(() => {
-      showMapPlaceholder();
-    });
+    .then(r => { if (!r.ok) throw new Error('GeoJSON tidak tersedia'); return r.json(); })
+    .then(geojson => renderChoropleth(geojson, klusterData, clusterLookup))
+    .catch(() => showMapPlaceholder());
 
   renderMapLegend();
 }
 
-/* ── Name matching helpers ──────────────────────────────────────
- *
- * GADM NAME_2 examples  →  data.json kabupaten
- *  'Salatiga'   (Kota)  →  'Kota Salatiga'
- *  'Surakarta'  (Kota)  →  'Kota Surakarta'
- *  'Kota Magelang'      →  'Kota Magelang'   (already matches)
- *  'Banjarnegara'       →  'Banjarnegara'    (already matches)
- * ────────────────────────────────────────────────────────────── */
-
-/** Normalise: strip leading 'Kab.'/'Kabupaten ' and lowercase */
+/* ── Name matching helpers ──────────────────────────────── */
 function normName(str) {
   if (!str) return '';
-  return str
-    .toLowerCase()
-    .replace(/^kab\.\s*/i, '')
-    .replace(/^kabupaten\s*/i, '')
-    .trim();
+  return str.toLowerCase().replace(/^kab\.\s*/i, '').replace(/^kabupaten\s*/i, '').trim();
 }
 
-/**
- * Build canonical name from GeoJSON feature:
- *   If TYPE_2 === 'Kota' and name doesn't start with 'kota', prepend it.
- *   This converts 'Salatiga' (Kota) → 'Kota Salatiga'.
- */
 function canonicalName(feature) {
-  const raw  = feature.properties.NAME_2  ||
-                feature.properties.KABKOT  ||
-                feature.properties.NAMOBJ  ||
-                feature.properties.name    ||
-                feature.properties.NAME    || '';
+  const raw  = feature.properties.NAME_2  || feature.properties.KABKOT  ||
+               feature.properties.NAMOBJ  || feature.properties.name    ||
+               feature.properties.NAME    || '';
   const type = (feature.properties.TYPE_2 || '').toLowerCase();
-  const lo   = raw.toLowerCase();
-  if (type === 'kota' && !lo.startsWith('kota ')) {
-    return 'Kota ' + raw;
-  }
-  return raw;
+  return (type === 'kota' && !raw.toLowerCase().startsWith('kota ')) ? 'Kota ' + raw : raw;
 }
 
-/** Find cluster item by feature name (with GADM normalisation) */
 function findCluster(feature, lookup) {
-  const canon = canonicalName(feature);    // e.g. 'Kota Salatiga'
+  const canon = canonicalName(feature);
   const lo    = canon.toLowerCase();
-
-  // 1. Direct lowercase match
   if (lookup[lo]) return lookup[lo];
-
-  // 2. Normalised (strip Kabupaten) match
   const n = normName(canon);
   for (const [key, val] of Object.entries(lookup)) {
     if (normName(key) === n) return val;
   }
-
-  // 3. Partial contains
   for (const [key, val] of Object.entries(lookup)) {
     const k = normName(key);
     if (k === n || k.includes(n) || n.includes(k)) return val;
@@ -762,104 +860,103 @@ function findCluster(feature, lookup) {
   return null;
 }
 
+/* ── Render choropleth with click interactivity ────────── */
 function renderChoropleth(geojson, klusterData, clusterLookup) {
-  const layer = L.geoJSON(geojson, {
+  geojsonLayer = L.geoJSON(geojson, {
     style: feature => {
       const item  = findCluster(feature, clusterLookup);
       const color = item != null ? CLUSTER_META[item.cluster].mapColor : '#d1d5db';
-      return {
-        fillColor:   color,
-        fillOpacity: 0.78,
-        color:       '#ffffff',
-        weight:      1.5,
-        opacity:     1,
-      };
+      return { fillColor: color, fillOpacity: 0.72, color: '#ffffff', weight: 1.5, opacity: 1 };
     },
 
     onEachFeature: (feature, layer) => {
       const displayName = canonicalName(feature);
-      const item = findCluster(feature, clusterLookup);
-      const cd   = item?.cluster_data;
-      const meta = item != null ? CLUSTER_META[item.cluster] : null;
+      const item        = findCluster(feature, clusterLookup);
+      const cd          = item?.cluster_data;
+      const meta        = item ? CLUSTER_META[item.cluster] : null;
 
-      const tooltipHtml = `
-        <div style="font-family:'Poppins',sans-serif;min-width:190px">
-          <div style="font-weight:700;color:#1F3C88;font-size:.85rem;margin-bottom:3px">
-            ${displayName}
-          </div>
+      const tip = `
+        <div style="font-family:'Poppins',sans-serif;min-width:200px">
+          <div style="font-weight:700;color:#1F3C88;font-size:.85rem;margin-bottom:3px">${displayName}</div>
           ${meta
-            ? `<div style="font-size:.75rem;color:${meta.color};font-weight:600">
-                 ${meta.label}
-               </div>
+            ? `<div style="font-size:.75rem;color:${meta.color};font-weight:600">${meta.label}</div>
                <hr style="margin:5px 0;border-color:#e2e8f0">
                <div style="font-size:.73rem;color:#64748b">
-                 TPT: <strong>${cd.tpt}%</strong> &nbsp;|&nbsp; TPAK: <strong>${cd.tpak}%</strong>
+                 TPT: <strong>${cd.tpt}%</strong>&nbsp;|&nbsp;TPAK: <strong>${cd.tpak}%</strong>
                </div>
-               <div style="font-size:.73rem;color:#64748b">
-                 IPM: <strong>${cd.ipm}</strong>
-               </div>`
-            : `<div style="font-size:.75rem;color:#94a3b8">Data klaster tidak ditemukan</div>`}
+               <div style="font-size:.73rem;color:#64748b">IPM: <strong>${cd.ipm}</strong></div>`
+            : `<div style="font-size:.75rem;color:#94a3b8">Tidak terklasifikasi</div>`}
+          <div style="font-size:.69rem;color:#94a3b8;margin-top:5px;font-style:italic">
+            &#128070; Klik untuk memilih wilayah ini
+          </div>
         </div>`;
 
-      layer.bindTooltip(tooltipHtml, { sticky: true, direction: 'top', opacity: 1 });
+      layer.bindTooltip(tip, { sticky: true, direction: 'top', opacity: 1 });
 
       layer.on({
-        mouseover: e => { e.target.setStyle({ weight: 2.5, fillOpacity: 0.95 }); },
-        mouseout:  e => { layer.resetStyle ? layer.resetStyle() : e.target.setStyle({ weight: 1.5, fillOpacity: 0.78 }); },
+        mouseover: e => {
+          if (e.target !== selectedLayer) e.target.setStyle({ weight: 2.5, fillOpacity: 0.92 });
+        },
+        mouseout: e => {
+          if (e.target !== selectedLayer) geojsonLayer.resetStyle(e.target);
+        },
+        click: e => {
+          if (!item) return;   // skip water bodies
+
+          // Reset previous selection
+          if (selectedLayer && selectedLayer !== e.target) geojsonLayer.resetStyle(selectedLayer);
+
+          // Highlight selected polygon
+          e.target.setStyle({ weight: 3.5, color: '#1e293b', fillOpacity: 0.95 });
+          e.target.bringToFront();
+          selectedLayer   = e.target;
+          selectedWilayah = displayName;
+
+          // Update badge & reset button
+          document.getElementById('selectedRegionBadge').textContent = displayName;
+          document.getElementById('resetMapBtn').style.display       = 'inline-flex';
+
+          // Fly to region
+          leafletMap.flyToBounds(layer.getBounds(), { maxZoom: 11, padding: [36, 36], duration: 0.9 });
+
+          // Update all charts
+          renderAll(globalPage2, displayName);
+        },
       });
     },
   }).addTo(leafletMap);
 
-  leafletMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
-}
-
-function showMapPlaceholder() {
-  const mapDiv = document.getElementById('mapCluster');
-  mapDiv.style.position = 'relative';
-
-  const overlay = document.createElement('div');
-  overlay.style.cssText = `
-    position:absolute;inset:0;z-index:999;
-    background:rgba(248,250,252,.93);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    border-radius:.75rem;text-align:center;padding:2.5rem;
-  `;
-  overlay.innerHTML = `
-    <svg width="52" height="52" fill="none" stroke="#94a3b8" stroke-width="1.4"
-         viewBox="0 0 24 24" style="margin-bottom:1rem">
-      <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7
-               m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618
-               a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-    </svg>
-    <p style="font-weight:700;color:#475569;margin-bottom:.5rem;font-size:.95rem">
-      File GeoJSON Belum Tersedia
-    </p>
-    <p style="font-size:.82rem;color:#94a3b8;max-width:400px;line-height:1.65">
-      Letakkan file hasil konversi SHP ke dalam folder
-      <code style="background:#f1f5f9;padding:.1rem .4rem;border-radius:.3rem">data/jateng.geojson</code>.<br>
-      Properti GeoJSON harus memiliki kolom nama kabupaten seperti
-      <code>KABKOT</code>, <code>NAME_2</code>, atau <code>NAMOBJ</code>.
-    </p>`;
-
-  mapDiv.appendChild(overlay);
+  leafletMap.fitBounds(geojsonLayer.getBounds(), { padding: [16, 16] });
 }
 
 function renderMapLegend() {
-  const el = document.getElementById('mapLegendItems');
-  if (!el) return;
-  el.innerHTML =
-    Object.entries(CLUSTER_META).map(([, v]) => `
-      <div class="map-legend-item">
-        <span class="map-legend-dot" style="background:${v.mapColor}"></span>
-        <span>${v.label}</span>
-      </div>`).join('') +
-    `<div class="map-legend-item">
-       <span class="map-legend-dot" style="background:#cccccc"></span>
-       <span>Data tidak tersedia</span>
-     </div>`;
+  const c = document.getElementById('mapLegendItems');
+  if (!c) return;
+  c.innerHTML = Object.values(CLUSTER_META).map(m => `
+    <div class="map-legend-item">
+      <span class="map-legend-dot" style="background:${m.mapColor}"></span>
+      <span>${m.label}</span>
+    </div>`).join('') + `
+    <div class="map-legend-item">
+      <span class="map-legend-dot" style="background:#d1d5db"></span>
+      <span>Tidak terklasifikasi</span>
+    </div>`;
+}
+
+function showMapPlaceholder() {
+  document.getElementById('mapCluster').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                height:350px;color:#94a3b8;text-align:center;padding:2rem">
+      <svg width="52" height="52" fill="none" stroke="#cbd5e1" stroke-width="1.4"
+           viewBox="0 0 24 24" style="margin-bottom:1rem">
+        <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6-10l6-3m6 3l-5.447-2.724A1 1 0 0115 3.618v10.764a1 1 0 01-.553.894L9 18m6-14v13"/>
+      </svg>
+      <p style="font-weight:600;color:#475569;margin-bottom:.4rem">GeoJSON Belum Tersedia</p>
+      <p style="font-size:.82rem">Pastikan <code>jateng.geojson</code> ada di root proyek.</p>
+    </div>`;
 }
 
 /* ================================================================
-   BOOT
+   AUTO-START
    ================================================================ */
 document.addEventListener('DOMContentLoaded', initDashboard);

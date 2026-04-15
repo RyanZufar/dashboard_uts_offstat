@@ -296,3 +296,137 @@ footer {
   main { padding: 1.5rem 1rem 3rem; }
   .card { padding: 1.25rem; }
 }
+
+/* ================================================================
+   NEWS BAR
+   ================================================================ */
+.news-bar {
+  background: #0f172a;
+  padding: .55rem 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+}
+.news-bar-label {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .7rem;
+  font-weight: 700;
+  color: #fb923c;
+  letter-spacing: .08em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .5; transform: scale(.75); }
+}
+.news-list {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: .1rem;
+}
+.news-list::-webkit-scrollbar { display: none; }
+.news-card {
+  flex-shrink: 0;
+  max-width: 280px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: .6rem;
+  padding: .45rem .8rem;
+  text-decoration: none;
+  transition: background .2s;
+}
+.news-card:hover { background: rgba(255,255,255,.12); }
+.news-card-meta  { font-size: .65rem; color: #94a3b8; margin-bottom: .15rem; }
+.news-card-title { font-size: .72rem; color: #e2e8f0; font-weight: 600; line-height: 1.35; }
+
+/* ================================================================
+   MAP + INSIGHT GRID LAYOUT
+   ================================================================ */
+.grid-map-insight {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .grid-map-insight { grid-template-columns: 1fr; }
+}
+
+/* Map card gets fixed height */
+.map-card { min-height: 580px; }
+
+/* Right panel stacks insight + klaster */
+.map-right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 580px;
+}
+
+/* Insight box: no bottom-margin inside the flex panel */
+.map-right-panel .insight-box { margin-bottom: 0; }
+
+/* ================================================================
+   REGION BADGE + RESET BUTTON
+   ================================================================ */
+.region-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(31,60,136,.1);
+  color: #1F3C88;
+  border: 1px solid rgba(31,60,136,.25);
+  border-radius: 999px;
+  padding: .3rem 1rem;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+.reset-map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: #fff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: .3rem .9rem;
+  font-size: .76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: 'Poppins', sans-serif;
+}
+.reset-map-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+/* ================================================================
+   RADAR DESCRIPTION
+   ================================================================ */
+.radar-description {
+  font-size: .83rem;
+  color: #64748b;
+  line-height: 1.65;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: .75rem;
+  padding: .8rem 1.2rem;
+  margin-bottom: 1.25rem;
+}
+
