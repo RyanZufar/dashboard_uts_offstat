@@ -8,49 +8,49 @@
 
 // ── FORMATTERS ──────────────────────────────────────────────────
 const fRupiah = v => 'Rp' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v);
-const fNum    = v => new Intl.NumberFormat('id-ID').format(v);
+const fNum = v => new Intl.NumberFormat('id-ID').format(v);
 
 // ── CHART.JS DEFAULTS ───────────────────────────────────────────
 Chart.defaults.font.family = "'Poppins', sans-serif";
-Chart.defaults.color       = '#64748b';
+Chart.defaults.color = '#64748b';
 Chart.register(ChartDataLabels);
 
 // ── CLUSTER META ────────────────────────────────────────────────
 const CLUSTER_META = {
   0: {
-    label:      'Klaster 0 – Wilayah Maju',
+    label: 'Klaster 0 – Wilayah Maju',
     shortLabel: 'Wilayah Maju',
-    color:      '#1F3C88',
-    bg:         '#eff6ff',
-    mapColor:   '#1F3C88',
-    desc:       'Wilayah dengan IPM tinggi, upah kompetitif, dan infrastruktur ketenagakerjaan matang.',
+    color: '#1F3C88',
+    bg: '#eff6ff',
+    mapColor: '#1F3C88',
+    desc: 'Wilayah dengan IPM tinggi, upah kompetitif, dan infrastruktur ketenagakerjaan matang.',
   },
   1: {
-    label:      'Klaster 1 – Wilayah Berkembang',
+    label: 'Klaster 1 – Wilayah Berkembang',
     shortLabel: 'Wilayah Berkembang',
-    color:      '#F97316',
-    bg:         '#fff7ed',
-    mapColor:   '#F97316',
-    desc:       'Wilayah dengan populasi besar, TPT relatif tinggi, dan upah menengah ke bawah.',
+    color: '#F97316',
+    bg: '#fff7ed',
+    mapColor: '#F97316',
+    desc: 'Wilayah dengan populasi besar, TPT relatif tinggi, dan upah menengah ke bawah.',
   },
   2: {
-    label:      'Klaster 2 – Wilayah Produktif',
+    label: 'Klaster 2 – Wilayah Produktif',
     shortLabel: 'Wilayah Produktif',
-    color:      '#3B82F6',
-    bg:         '#f0f9ff',
-    mapColor:   '#3B82F6',
-    desc:       'Wilayah dengan TPAK tinggi, TPT rendah-sedang, dan pertumbuhan ekonomi positif.',
+    color: '#3B82F6',
+    bg: '#f0f9ff',
+    mapColor: '#3B82F6',
+    desc: 'Wilayah dengan TPAK tinggi, TPT rendah-sedang, dan pertumbuhan ekonomi positif.',
   },
 };
 
 
 // ── MUTABLE STATE ───────────────────────────────────────────────
 const charts = { tpak: null, tpt: null, upah: null, pasar: null, radar: null };
-let leafletMap      = null;
-let globalPage2     = null;
+let leafletMap = null;
+let globalPage2 = null;
 let selectedWilayah = 'Jawa Tengah';
-let selectedLayer   = null;   // currently highlighted Leaflet layer
-let geojsonLayer    = null;   // full L.geoJSON layer reference
+let selectedLayer = null;   // currently highlighted Leaflet layer
+let geojsonLayer = null;   // full L.geoJSON layer reference
 
 /* ================================================================
    INIT
@@ -58,20 +58,20 @@ let geojsonLayer    = null;   // full L.geoJSON layer reference
 function initDashboard() {
   // Hanya ambil data.json karena data klaster sudah ada di dalamnya
   fetch('data.json')
-  .then(r => {
-    if (!r.ok) throw new Error('Gagal mengambil data.json (HTTP ' + r.status + ')');
-    return r.json();
-  })
-  .then(data => {
-    globalPage2 = data.page2;
-    buildLayout();
-    renderAll(data.page2, 'Jawa Tengah');
-    
-    // Ambil data kluster langsung dari data.json untuk peta
-    initMap(data.page2.kluster);
-  })
-  .catch(err => {
-    document.getElementById('mainContent').innerHTML = `
+    .then(r => {
+      if (!r.ok) throw new Error('Gagal mengambil data.json (HTTP ' + r.status + ')');
+      return r.json();
+    })
+    .then(data => {
+      globalPage2 = data.page2;
+      buildLayout();
+      renderAll(data.page2, 'Jawa Tengah');
+
+      // Ambil data kluster langsung dari data.json untuk peta
+      initMap(data.page2.kluster);
+    })
+    .catch(err => {
+      document.getElementById('mainContent').innerHTML = `
       <div style="text-align:center;padding:5rem 2rem;color:#ef4444">
         <p style="font-size:1.2rem;font-weight:700">Gagal Memuat Data</p>
         <p style="margin-top:.6rem;color:#94a3b8;font-size:.88rem">${err.message}</p>
@@ -79,7 +79,7 @@ function initDashboard() {
           Pastikan halaman dibuka melalui server lokal (bukan file://)
         </p>
       </div>`;
-  });
+    });
 }
 
 /* ================================================================
@@ -197,13 +197,11 @@ function buildLayout() {
             <h3>Profil Performa Wilayah terhadap Rata-rata Klaster</h3>
           </div>
           <p class="radar-description" style="text-align:justify;">
-            Grafik di bawah ini memvisualisasikan bagaimana performa indikator ketenagakerjaan di wilayah terpilih 
-            jika dibandingkan dengan kondisi rata-rata pada klaster yang sama. Nilai <strong>100%</strong> 
+            Grafik di bawah ini memvisualisasikan performa 8 indikator ketenagakerjaan di wilayah terpilih 
+            dibandingkan dengan kondisi rata-rata pada klaster yang sama. Nilai <strong>100%</strong> 
             merepresentasikan titik rata-rata klaster.&nbsp;
-            <span style="color:#16a34a;font-weight:600">&#9650; &gt;100%</span> menandakan performa di atas rata-rata, sedangkan&nbsp;
-            <span style="color:#d97706;font-weight:600">&#9660; &lt;100%</span> menandakan di bawah rata-rata.&nbsp;
-            Khusus pada dimensi <em>Efisiensi Ketenagakerjaan</em>, skor pengukuran yang lebih tinggi 
-            mengindikasikan Tingkat Pengangguran Terbuka (TPT) yang lebih rendah (kondisi optimal).
+            <span style="color:#1F3C88;font-weight:600">&#9650; &ge;100%</span> menandakan performa di atas rata-rata (Biru), sedangkan&nbsp;
+            <span style="color:#F97316;font-weight:600">&#9660; &lt;100%</span> menandakan di bawah rata-rata (Oranye).&nbsp;
           </p>
           <div style="display:flex;flex-direction:column;align-items:center;gap:1.5rem;">
             <div class="chart-wrap" style="width:100%; max-width:860px; height:650px;">
@@ -230,12 +228,12 @@ function buildLayout() {
    RENDER ALL
    ================================================================ */
 function renderAll(page2, wilayah) {
-  const trenItem    = page2.tren.find(t => t.kabupaten === wilayah);
-  const kabItem     = page2.kabupaten.find(k => k.nama  === wilayah);
+  const trenItem = page2.tren.find(t => t.kabupaten === wilayah);
+  const kabItem = page2.kabupaten.find(k => k.nama === wilayah);
   const klusterItem = page2.kluster.find(k => k.kabupaten === wilayah);
 
   if (!trenItem) { console.error('Data tren tidak ditemukan untuk:', wilayah); return; }
-  if (!kabItem)  { console.error('Data kabupaten tidak ditemukan untuk:', wilayah); return; }
+  if (!kabItem) { console.error('Data kabupaten tidak ditemukan untuk:', wilayah); return; }
 
   updateInsight(trenItem, kabItem, klusterItem, wilayah);
   renderChartTPAK(trenItem);
@@ -259,11 +257,11 @@ function renderAll(page2, wilayah) {
    INSIGHT  (template format)
    ================================================================ */
 function updateInsight(tren, kab, kluster, wilayah) {
-  const latest    = tren.data[tren.data.length - 1];
-  const earliest  = tren.data[0];
+  const latest = tren.data[tren.data.length - 1];
+  const earliest = tren.data[0];
   const tpakDelta = +(latest.tpak - earliest.tpak).toFixed(2);
-  const tptDelta  = +(latest.tpt  - earliest.tpt).toFixed(2);
-  const gapUpah   = kab ? kab.upah.formal - kab.upah.informal : 0;
+  const tptDelta = +(latest.tpt - earliest.tpt).toFixed(2);
+  const gapUpah = kab ? kab.upah.formal - kab.upah.informal : 0;
 
   const OG = 'color:#fb923c;font-weight:600';
 
@@ -299,10 +297,10 @@ function renderChartTPAK(trenItem) {
       labels: trenItem.data.map(d => d.tahun),
       datasets: [{
         label: 'TPAK (%)',
-        data:  trenItem.data.map(d => d.tpak),
-        borderColor:         '#1F3C88',
-        backgroundColor:     'rgba(31,60,136,.1)',
-        pointBackgroundColor:'#1F3C88',
+        data: trenItem.data.map(d => d.tpak),
+        borderColor: '#1F3C88',
+        backgroundColor: 'rgba(31,60,136,.1)',
+        pointBackgroundColor: '#1F3C88',
         pointRadius: 4, pointHoverRadius: 7,
         borderWidth: 2.5, fill: true, tension: .35,
       }],
@@ -312,13 +310,13 @@ function renderChartTPAK(trenItem) {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         datalabels: { display: false },
-        legend:     { display: false },
-        tooltip:    { callbacks: { label: c => `TPAK: ${c.parsed.y}%` } },
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => `TPAK: ${c.parsed.y}%` } },
       },
       scales: {
         y: {
           title: { display: true, text: 'TPAK (%)', color: '#1F3C88', font: { weight: '600' } },
-          grid:  { color: '#f1f5f9' },
+          grid: { color: '#f1f5f9' },
           ticks: { callback: v => parseFloat(v.toFixed(1)) + '%' },
         },
         x: { grid: { display: false } },
@@ -339,10 +337,10 @@ function renderChartTPT(trenItem) {
       labels: trenItem.data.map(d => d.tahun),
       datasets: [{
         label: 'TPT (%)',
-        data:  trenItem.data.map(d => d.tpt),
-        borderColor:         '#F97316',
-        backgroundColor:     'rgba(249,115,22,.08)',
-        pointBackgroundColor:'#F97316',
+        data: trenItem.data.map(d => d.tpt),
+        borderColor: '#F97316',
+        backgroundColor: 'rgba(249,115,22,.08)',
+        pointBackgroundColor: '#F97316',
         pointRadius: 4, pointHoverRadius: 7,
         borderWidth: 2.5, fill: true, tension: .35,
       }],
@@ -352,13 +350,13 @@ function renderChartTPT(trenItem) {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         datalabels: { display: false },
-        legend:     { display: false },
-        tooltip:    { callbacks: { label: c => `TPT: ${c.parsed.y}%` } },
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => `TPT: ${c.parsed.y}%` } },
       },
       scales: {
         y: {
           title: { display: true, text: 'TPT (%)', color: '#F97316', font: { weight: '600' } },
-          grid:  { color: '#f1f5f9' },
+          grid: { color: '#f1f5f9' },
           ticks: { callback: v => parseFloat(v.toFixed(1)) + '%' },
         },
         x: { grid: { display: false } },
@@ -373,12 +371,12 @@ function renderChartTPT(trenItem) {
 function renderChartUpah(kabItem, wilayah, page2) {
   if (charts.upah) { charts.upah.destroy(); charts.upah = null; }
 
-  const formal       = kabItem?.upah?.formal   ?? 0;
-  const informal     = kabItem?.upah?.informal ?? 0;
-  const provData     = page2.kabupaten.find(k => k.nama === 'Jawa Tengah');
-  const provFormal   = provData?.upah?.formal   ?? 0;
+  const formal = kabItem?.upah?.formal ?? 0;
+  const informal = kabItem?.upah?.informal ?? 0;
+  const provData = page2.kabupaten.find(k => k.nama === 'Jawa Tengah');
+  const provFormal = provData?.upah?.formal ?? 0;
   const provInformal = provData?.upah?.informal ?? 0;
-  const isProvince   = (wilayah === 'Jawa Tengah');
+  const isProvince = (wilayah === 'Jawa Tengah');
 
   const upahStatBox = document.getElementById('upahStatBox');
   if (upahStatBox) {
@@ -386,7 +384,7 @@ function renderChartUpah(kabItem, wilayah, page2) {
       const diff = Math.abs(formal - informal);
       const dom = formal > informal ? 'Sektor Formal' : 'Sektor Informal';
       const domColor = formal > informal ? '#1F3C88' : '#F97316';
-      
+
       upahStatBox.innerHTML = `
         <div class="pasar-stat-row">
           <span class="pasar-stat-badge" style="background:${domColor}20;color:${domColor}">
@@ -408,7 +406,7 @@ function renderChartUpah(kabItem, wilayah, page2) {
   const datasets = [
     {
       label: wilayah,
-      data:  [formal, informal],
+      data: [formal, informal],
       backgroundColor: ['#1F3C88', '#F97316'],
       borderRadius: radiusTop, borderSkipped: false,
     },
@@ -416,7 +414,7 @@ function renderChartUpah(kabItem, wilayah, page2) {
   if (!isProvince) {
     datasets.push({
       label: 'Jawa Tengah (Provinsi)',
-      data:  [provFormal, provInformal],
+      data: [provFormal, provInformal],
       backgroundColor: ['rgba(31,60,136,.28)', 'rgba(249,115,22,.28)'],
       borderRadius: radiusTop, borderSkipped: false,
     });
@@ -436,14 +434,14 @@ function renderChartUpah(kabItem, wilayah, page2) {
             usePointStyle: true, pointStyle: 'rectRounded',
             boxWidth: 14, boxHeight: 14, padding: 22,
             generateLabels: chart => {
-              const ds      = chart.data.datasets;
+              const ds = chart.data.datasets;
               const entries = [
-                { text: `Formal – ${ds[0].label}`,   fill: '#1F3C88',            ds: 0 },
-                { text: `Informal – ${ds[0].label}`, fill: '#F97316',            ds: 0 },
+                { text: `Formal – ${ds[0].label}`, fill: '#1F3C88', ds: 0 },
+                { text: `Informal – ${ds[0].label}`, fill: '#F97316', ds: 0 },
               ];
               if (ds[1]) {
                 entries.push(
-                  { text: `Formal – ${ds[1].label}`,   fill: 'rgba(31,60,136,.4)',  ds: 1 },
+                  { text: `Formal – ${ds[1].label}`, fill: 'rgba(31,60,136,.4)', ds: 1 },
                   { text: `Informal – ${ds[1].label}`, fill: 'rgba(249,115,22,.4)', ds: 1 },
                 );
               }
@@ -467,7 +465,7 @@ function renderChartUpah(kabItem, wilayah, page2) {
         y: {
           beginAtZero: true,
           ticks: { callback: v => fRupiah(v) },
-          grid:  { color: '#f1f5f9' },
+          grid: { color: '#f1f5f9' },
         },
         x: { grid: { display: false } },
       },
@@ -487,14 +485,14 @@ function renderChartPasar(kabItem, mode) {
   const pr = mode === 'lowongan'
     ? kabItem.lowongan_kerja.perempuan : kabItem.pencari_kerja.perempuan;
 
-  const total    = lk + pr;
-  const lkPct    = lk / total * 100;
-  const prPct    = pr / total * 100;
-  const diffPct  = (Math.abs(lk - pr) / total * 100).toFixed(1);
+  const total = lk + pr;
+  const lkPct = lk / total * 100;
+  const prPct = pr / total * 100;
+  const diffPct = (Math.abs(lk - pr) / total * 100).toFixed(1);
   const dominant = lk > pr ? 'Laki-laki' : 'Perempuan';
   const minority = lk > pr ? 'Perempuan' : 'Laki-laki';
   const domColor = lk > pr ? '#1F3C88' : '#F97316';
-  const modeLabel= mode === 'lowongan' ? 'Lowongan Kerja Terdaftar' : 'Pencari Kerja Terdaftar';
+  const modeLabel = mode === 'lowongan' ? 'Lowongan Kerja Terdaftar' : 'Pencari Kerja Terdaftar';
 
   const statBox = document.getElementById('pasarStatBox');
   if (statBox) {
@@ -548,9 +546,9 @@ function renderChartPasar(kabItem, mode) {
    KLASTER CARD
    ================================================================ */
 function renderKlasterCard(klusterItem, allKluster) {
-  const c     = klusterItem.cluster;
-  const meta  = CLUSTER_META[c];
-  const cd    = klusterItem.cluster_data;
+  const c = klusterItem.cluster;
+  const meta = CLUSTER_META[c];
+  const cd = klusterItem.cluster_data;
   const peers = allKluster.filter(k => k.cluster === c).map(k => k.kabupaten);
 
   document.getElementById('klasterContent').innerHTML = `
@@ -568,11 +566,20 @@ function renderKlasterCard(klusterItem, allKluster) {
         <div class="kpi-sub">jiwa</div>
       </div>
       <div class="kpi-item">
-        <div class="kpi-label">TPT 2024</div>
+        <div class="kpi-label" style="font-size: 0.55rem; font-weight: 700; line-height: 1.1;">Penduduk Bukan Angkatan Kerja</div>
+        <div class="kpi-value">${fNum(cd.penduduk_bukan_bekerja)}</div>
+        <div class="kpi-sub">jiwa</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-label">TPT</div>
         <div class="kpi-value" style="color:#F97316">${cd.tpt}%</div>
       </div>
       <div class="kpi-item">
-        <div class="kpi-label">TPAK 2024</div>
+        <div class="kpi-label">TKK</div>
+        <div class="kpi-value" style="color:#1F3C88">${cd.tkk}%</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-label">TPAK</div>
         <div class="kpi-value" style="color:#1F3C88">${cd.tpak}%</div>
       </div>
       <div class="kpi-item">
@@ -580,19 +587,19 @@ function renderKlasterCard(klusterItem, allKluster) {
         <div class="kpi-value">${cd.ipm}</div>
       </div>
       <div class="kpi-item">
-        <div class="kpi-label">Pengeluaran/Kapita</div>
+        <div class="kpi-label" style="font-size: 0.62rem;">Pengeluaran/Kapita</div>
         <div class="kpi-value" style="font-size:.78rem">${fRupiah(cd.pengeluaran_per_kapita)}</div>
       </div>
       <div class="kpi-item">
-        <div class="kpi-label">Rata-rata Upah</div>
+        <div class="kpi-label">Upah Rata-rata</div>
         <div class="kpi-value" style="font-size:.78rem">${fRupiah(cd.rata_upah)}</div>
       </div>
     </div>
     <p class="peers-title">Anggota Klaster:</p>
     <div class="radar-peers">
       ${peers.map(p =>
-        `<span class="peer-chip ${p === klusterItem.kabupaten ? 'active' : ''}">${p}</span>`
-      ).join('')}
+    `<span class="peer-chip ${p === klusterItem.kabupaten ? 'active' : ''}">${p}</span>`
+  ).join('')}
     </div>`;
 }
 
@@ -602,25 +609,31 @@ function renderKlasterCard(klusterItem, allKluster) {
 function renderChartRadar(klusterItem, allKluster) {
   if (charts.radar) { charts.radar.destroy(); charts.radar = null; }
 
-  const cd    = klusterItem.cluster_data;
+  const cd = klusterItem.cluster_data;
   const peers = allKluster.filter(k => k.cluster === klusterItem.cluster);
 
   const avg = {
-    tpak:        peers.reduce((s, k) => s + k.cluster_data.tpak,                   0) / peers.length,
-    tpt:         peers.reduce((s, k) => s + k.cluster_data.tpt,                    0) / peers.length,
-    ipm:         peers.reduce((s, k) => s + k.cluster_data.ipm,                    0) / peers.length,
+    tpak: peers.reduce((s, k) => s + k.cluster_data.tpak, 0) / peers.length,
+    tpt: peers.reduce((s, k) => s + k.cluster_data.tpt, 0) / peers.length,
+    ipm: peers.reduce((s, k) => s + k.cluster_data.ipm, 0) / peers.length,
     pengeluaran: peers.reduce((s, k) => s + k.cluster_data.pengeluaran_per_kapita, 0) / peers.length,
-    upah:        peers.reduce((s, k) => s + k.cluster_data.rata_upah,              0) / peers.length,
+    upah: peers.reduce((s, k) => s + k.cluster_data.rata_upah, 0) / peers.length,
+    penduduk: peers.reduce((s, k) => s + k.cluster_data.penduduk, 0) / peers.length,
+    pbb: peers.reduce((s, k) => s + k.cluster_data.penduduk_bukan_bekerja, 0) / peers.length,
+    tkk: peers.reduce((s, k) => s + k.cluster_data.tkk, 0) / peers.length,
   };
 
   const norm = (val, a) => Math.min(Math.round(val / a * 100), 150);
 
   const values = [
-    norm(cd.tpak,                   avg.tpak),
-    norm(cd.ipm,                    avg.ipm),
+    norm(cd.penduduk, avg.penduduk),
+    norm(cd.penduduk_bukan_bekerja, avg.pbb),
+    norm(cd.tpt, avg.tpt),
+    norm(cd.tkk, avg.tkk),
+    norm(cd.tpak, avg.tpak),
+    norm(cd.ipm, avg.ipm),
     norm(cd.pengeluaran_per_kapita, avg.pengeluaran),
-    norm(cd.rata_upah,              avg.upah),
-    norm(100 - cd.tpt,              100 - avg.tpt),
+    norm(cd.rata_upah, avg.upah),
   ];
 
   const ctx = document.getElementById('chartRadar').getContext('2d');
@@ -628,25 +641,28 @@ function renderChartRadar(klusterItem, allKluster) {
     type: 'radar',
     data: {
       labels: [
+        'Penduduk\n(Populasi)',
+        'Bukan Angkatan\nKerja',
+        'TPT\n(Pengangguran)',
+        'TKK\n(Kesempatan\nKerja)',
         'TPAK\n(Partisipasi\nAngkatan Kerja)',
         'IPM\n(Indeks\nPembangunan)',
         'Pengeluaran\nPer Kapita',
-        'Upah\nRata-rata',
-        'Efisiensi\nKetenagakerjaan\n(TPT Rendah)',
+        'Upah\nRata-rata'
       ],
       datasets: [
         {
           label: ' ' + klusterItem.kabupaten,
-          data:  values,
-          borderColor:         '#1F3C88',
-          backgroundColor:     'rgba(31,60,136,.15)',
-          pointBackgroundColor:'#1F3C88',
+          data: values,
+          borderColor: '#1F3C88',
+          backgroundColor: 'rgba(31,60,136,.15)',
+          pointBackgroundColor: '#1F3C88',
           borderWidth: 2.5, pointRadius: 5,
         },
         {
           label: ' Rata-rata Klaster (100%)',
-          data:  [100, 100, 100, 100, 100],
-          borderColor:     '#94A3B8',
+          data: [100, 100, 100, 100, 100, 100, 100, 100],
+          borderColor: '#94A3B8',
           backgroundColor: 'rgba(148,163,184,.08)',
           pointBackgroundColor: '#94A3B8',
           borderWidth: 1.5, borderDash: [5, 4], pointRadius: 3,
@@ -657,7 +673,7 @@ function renderChartRadar(klusterItem, allKluster) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         datalabels: { display: false },
-        legend:     { position: 'top', labels: { usePointStyle: true, boxWidth: 10, padding: 25 } },
+        legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 10, padding: 25 } },
         tooltip: {
           callbacks: {
             label: c => {
@@ -674,8 +690,8 @@ function renderChartRadar(klusterItem, allKluster) {
           beginAtZero: true, min: 0, max: 150,
           ticks: { stepSize: 50, callback: v => v + '%' },
           pointLabels: { font: { size: 10, weight: '600' }, color: '#475569' },
-          grid:        { color: '#e2e8f0' },
-          angleLines:  { color: '#e2e8f0' },
+          grid: { color: '#e2e8f0' },
+          angleLines: { color: '#e2e8f0' },
         },
       },
     },
@@ -684,49 +700,84 @@ function renderChartRadar(klusterItem, allKluster) {
   // ── Enhanced sidebar ──
   const RADAR_DIMS = [
     {
+      label: 'Penduduk',
+      fullLabel: 'Jumlah Penduduk',
+      value: (cd.penduduk >= 1000000 ? parseFloat((cd.penduduk / 1000000).toFixed(2)) + ' Juta' : fNum(cd.penduduk)),
+      avg: (avg.penduduk >= 1000000 ? parseFloat((avg.penduduk / 1000000).toFixed(2)) + ' Juta' : fNum(Math.round(avg.penduduk))),
+      score: values[0],
+      color: '#1F3C88',
+      desc: 'Total populasi penduduk di wilayah ini.',
+      invertGoodBad: false,
+    },
+    {
+      label: 'Bukan Angkatan Kerja',
+      fullLabel: 'Penduduk Bukan Angkatan Kerja',
+      value: (cd.penduduk_bukan_bekerja >= 1000000 ? parseFloat((cd.penduduk_bukan_bekerja / 1000000).toFixed(2)) + ' Juta' : fNum(cd.penduduk_bukan_bekerja)),
+      avg: (avg.pbb >= 1000000 ? parseFloat((avg.pbb / 1000000).toFixed(2)) + ' Juta' : fNum(Math.round(avg.pbb))),
+      score: values[1],
+      color: '#475569',
+      desc: 'Jumlah penduduk usia kerja yang tidak masuk dalam angkatan kerja.',
+      invertGoodBad: true,
+    },
+    {
+      label: 'TPT',
+      fullLabel: 'Tingkat Pengangguran Terbuka',
+      value: cd.tpt + '%',
+      avg: avg.tpt.toFixed(2) + '%',
+      score: values[2],
+      color: '#F97316',
+      desc: 'Persentase pengangguran murni terhadap total angkatan kerja.',
+      invertGoodBad: true,
+    },
+    {
+      label: 'TKK',
+      fullLabel: 'Tingkat Kesempatan Kerja',
+      value: cd.tkk + '%',
+      avg: avg.tkk.toFixed(2) + '%',
+      score: values[3],
+      color: '#1F3C88',
+      desc: 'Persentase angkatan kerja yang terserap di pasar kerja.',
+      invertGoodBad: false,
+    },
+    {
       label: 'TPAK',
       fullLabel: 'Partisipasi Angkatan Kerja',
       value: cd.tpak + '%',
-      avg:   avg.tpak.toFixed(2) + '%',
-      score: values[0],
+      avg: avg.tpak.toFixed(2) + '%',
+      score: values[4],
       color: '#1F3C88',
-      desc:  'Persen penduduk usia kerja yang aktif bekerja atau mencari kerja.',
+      desc: 'Persen penduduk usia kerja yang aktif bekerja atau mencari kerja.',
+      invertGoodBad: false,
     },
     {
       label: 'IPM',
       fullLabel: 'Indeks Pembangunan Manusia',
       value: String(cd.ipm),
-      avg:   avg.ipm.toFixed(2),
-      score: values[1],
+      avg: avg.ipm.toFixed(2),
+      score: values[5],
       color: '#3B82F6',
-      desc:  'Indeks komposit: harapan hidup, pendidikan, dan standar hidup.',
+      desc: 'Indeks komposit: harapan hidup, pendidikan, dan standar hidup.',
+      invertGoodBad: false,
     },
     {
       label: 'Pengeluaran/Kapita',
       fullLabel: 'Daya Beli Masyarakat',
       value: fRupiah(cd.pengeluaran_per_kapita),
-      avg:   fRupiah(Math.round(avg.pengeluaran)),
-      score: values[2],
+      avg: fRupiah(Math.round(avg.pengeluaran)),
+      score: values[6],
       color: '#1F3C88',
-      desc:  'Rata-rata pengeluaran per kapita per tahun – proksi daya beli.',
+      desc: 'Rata-rata pengeluaran per kapita per tahun – proksi daya beli.',
+      invertGoodBad: false,
     },
     {
       label: 'Upah Rata-rata',
       fullLabel: 'Tingkat Upah Wilayah',
       value: fRupiah(cd.rata_upah),
-      avg:   fRupiah(Math.round(avg.upah)),
-      score: values[3],
+      avg: fRupiah(Math.round(avg.upah)),
+      score: values[7],
       color: '#F97316',
-      desc:  'Rata-rata upah seluruh sektor (formal + informal) di wilayah ini.',
-    },
-    {
-      label: 'Efisiensi (TPT)',
-      fullLabel: 'Tingkat Pengangguran Terbuka',
-      value: cd.tpt + '%',
-      avg:   avg.tpt.toFixed(2) + '%',
-      score: values[4],
-      color: '#F97316',
-      desc:  'Skor invers TPT: makin tinggi skor, makin rendah pengangguran (lebih baik).',
+      desc: 'Rata-rata upah seluruh sektor (formal + informal) di wilayah ini.',
+      invertGoodBad: false,
     },
   ];
 
@@ -737,17 +788,26 @@ function renderChartRadar(klusterItem, allKluster) {
     </p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1rem;">
       ${RADAR_DIMS.map(d => {
-        const above  = d.score >= 100;
-        const badge  = above
-          ? `<span style="background:#dcfce7;color:#16a34a;font-size:.67rem;padding:.12rem .4rem;border-radius:99px;font-weight:700;white-space:nowrap">▲ Di atas rata-rata</span>`
-          : `<span style="background:#fef3c7;color:#d97706;font-size:.67rem;padding:.12rem .4rem;border-radius:99px;font-weight:700;white-space:nowrap">▼ Di bawah rata-rata</span>`;
-        const bar = `
+    const above = d.score >= 100;
+    let badgeColor, badgeBg, badgeText;
+    if (above) {
+      badgeText = '▲ Di atas rata-rata';
+      badgeColor = '#1F3C88';
+      badgeBg = '#eff6ff';
+    } else {
+      badgeText = '▼ Di bawah rata-rata';
+      badgeColor = '#F97316';
+      badgeBg = '#fff7ed';
+    }
+
+    const badge = `<span style="background:${badgeBg};color:${badgeColor};font-size:.67rem;padding:.12rem .4rem;border-radius:99px;font-weight:700;white-space:nowrap">${badgeText}</span>`;
+    const bar = `
           <div style="margin:.3rem 0;background:#e2e8f0;border-radius:4px;height:5px;overflow:hidden">
-            <div style="height:100%;width:${Math.min(d.score, 150)/1.5}%;
-                        background:${above ? '#1F3C88' : '#F97316'};border-radius:4px;
+            <div style="height:100%;width:${Math.min(d.score, 150) / 1.5}%;
+                        background:${badgeColor};border-radius:4px;
                         transition:width .5s ease"></div>
           </div>`;
-        return `
+    return `
           <div style="padding:.7rem .9rem;border-radius:.65rem;margin-bottom:0;
                       background:#f8fafc;border:1px solid #e2e8f0;display:flex;flex-direction:column;justify-content:space-between;">
             <div>
@@ -764,9 +824,9 @@ function renderChartRadar(klusterItem, allKluster) {
                 ${badge}
               </div>
             </div>
-            <div style="font-size:.7rem;color:#94a3b8;margin-top:.6rem;font-style:italic">${d.desc}</div>
+            <div style="font-size:.7rem;color:#94a3b8;margin-top:.6rem;line-height:1.4;font-style:italic">${d.desc}</div>
           </div>`;
-      }).join('')}
+  }).join('')}
     </div>`;
 }
 
@@ -809,16 +869,16 @@ function normName(str) {
 }
 
 function canonicalName(feature) {
-  const raw  = feature.properties.NAME_2  || feature.properties.KABKOT  ||
-               feature.properties.NAMOBJ  || feature.properties.name    ||
-               feature.properties.NAME    || '';
+  const raw = feature.properties.NAME_2 || feature.properties.KABKOT ||
+    feature.properties.NAMOBJ || feature.properties.name ||
+    feature.properties.NAME || '';
   const type = (feature.properties.TYPE_2 || '').toLowerCase();
   return (type === 'kota' && !raw.toLowerCase().startsWith('kota ')) ? 'Kota ' + raw : raw;
 }
 
 function findCluster(feature, lookup) {
   const canon = canonicalName(feature);
-  const lo    = canon.toLowerCase();
+  const lo = canon.toLowerCase();
   if (lookup[lo]) return lookup[lo];
   const n = normName(canon);
   for (const [key, val] of Object.entries(lookup)) {
@@ -835,32 +895,34 @@ function findCluster(feature, lookup) {
 function renderChoropleth(geojson, klusterData, clusterLookup) {
   geojsonLayer = L.geoJSON(geojson, {
     style: feature => {
-      const item  = findCluster(feature, clusterLookup);
+      const item = findCluster(feature, clusterLookup);
       const color = item != null ? CLUSTER_META[item.cluster].mapColor : '#d1d5db';
       return { fillColor: color, fillOpacity: 0.72, color: '#ffffff', weight: 1.5, opacity: 1 };
     },
 
     onEachFeature: (feature, layer) => {
       const displayName = canonicalName(feature);
-      const item        = findCluster(feature, clusterLookup);
-      const cd          = item?.cluster_data;
-      const meta        = item ? CLUSTER_META[item.cluster] : null;
+      const item = findCluster(feature, clusterLookup);
+      const cd = item?.cluster_data;
+      const meta = item ? CLUSTER_META[item.cluster] : null;
 
       const tip = `
         <div style="font-family:'Poppins',sans-serif;min-width:260px;padding:2px">
           <div style="font-weight:700;color:#1F3C88;font-size:.9rem;margin-bottom:2px">${displayName}</div>
           ${meta
-            ? `<div style="font-size:.72rem;color:${meta.color};font-weight:600;margin-bottom:6px">${meta.label}</div>
-               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:0.75rem;color:#475569">
-                 <div>Penduduk: <strong style="color:#1e293b">${cd.penduduk >= 1000000 ? (cd.penduduk/1000000).toFixed(1)+'jt' : fNum(cd.penduduk)}</strong></div>
-                 <div>IPM: <strong style="color:#1e293b">${cd.ipm}</strong></div>
+          ? `<div style="font-size:.72rem;color:${meta.color};font-weight:600;margin-bottom:6px">${meta.label}</div>
+               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:0.73rem;color:#475569">
+                 <div>Penduduk: <strong style="color:#1e293b">${cd.penduduk >= 1000000 ? parseFloat((cd.penduduk / 1000000).toFixed(2)) + 'jt' : fNum(cd.penduduk)}</strong></div>
+                 <div>Pn. Bkn Bekerja: <strong style="color:#1e293b">${cd.penduduk_bukan_bekerja >= 1000000 ? parseFloat((cd.penduduk_bukan_bekerja / 1000000).toFixed(2)) + 'jt' : fNum(cd.penduduk_bukan_bekerja)}</strong></div>
                  <div>TPT: <strong style="color:#F97316">${cd.tpt}%</strong></div>
+                 <div>TKK: <strong style="color:#1F3C88">${cd.tkk}%</strong></div>
                  <div>TPAK: <strong style="color:#1F3C88">${cd.tpak}%</strong></div>
-                 <div>Pengeluaran: <strong style="color:#1e293b">${(cd.pengeluaran_per_kapita/1000000).toFixed(1)}jt</strong></div>
-                 <div>Upah: <strong style="color:#1e293b">${(cd.rata_upah/1000000).toFixed(1)}jt</strong></div>
+                 <div>IPM: <strong style="color:#1e293b">${cd.ipm}</strong></div>
+                 <div>Pengeluaran: <strong style="color:#1e293b">Rp${parseFloat((cd.pengeluaran_per_kapita / 1000000).toFixed(1))}jt</strong></div>
+                 <div>Upah: <strong style="color:#1e293b">Rp${parseFloat((cd.rata_upah / 1000000).toFixed(2))}jt</strong></div>
                </div>
                <hr style="margin:8px 0;border:0;border-top:1px solid #e2e8f0;">`
-            : `<div style="font-size:.75rem;color:#94a3b8">Tidak terklasifikasi</div>`}
+          : `<div style="font-size:.75rem;color:#94a3b8">Tidak terklasifikasi</div>`}
           <div style="font-size:0.7rem;color:#94a3b8;font-style:italic">
              &#128070; Klik untuk analisis detail
           </div>
@@ -884,12 +946,12 @@ function renderChoropleth(geojson, klusterData, clusterLookup) {
           // Highlight selected polygon
           e.target.setStyle({ weight: 3.5, color: '#1e293b', fillOpacity: 0.95 });
           e.target.bringToFront();
-          selectedLayer   = e.target;
+          selectedLayer = e.target;
           selectedWilayah = displayName;
 
           // Update badge & reset button
           document.getElementById('selectedRegionBadge').textContent = displayName;
-          document.getElementById('resetMapBtn').style.display       = 'inline-flex';
+          document.getElementById('resetMapBtn').style.display = 'inline-flex';
 
           // Fly to region
           leafletMap.flyToBounds(layer.getBounds(), { maxZoom: 11, padding: [36, 36], duration: 0.9 });
