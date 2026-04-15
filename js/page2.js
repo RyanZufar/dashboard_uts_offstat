@@ -69,10 +69,6 @@ function initDashboard() {
     
     // Ambil data kluster langsung dari data.json untuk peta
     initMap(data.page2.kluster);
-
-    document.getElementById('filterWilayah').addEventListener('change', function () {
-      renderAll(globalPage2, this.value);
-    });
   })
   .catch(err => {
     document.getElementById('mainContent').innerHTML = `
