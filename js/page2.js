@@ -1,21 +1,12 @@
-/* ================================================================
-   page2.js – Dashboard Ketenagakerjaan Jawa Tengah – Analisis Regional
-   Major revision: Map sebagai filter wilayah, 2 tren chart terpisah,
-   news section, insight template, radar explanation
-   ================================================================ */
-
 'use strict';
 
-// ── FORMATTERS ──────────────────────────────────────────────────
 const fRupiah = v => 'Rp' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v);
 const fNum = v => new Intl.NumberFormat('id-ID').format(v);
 
-// ── CHART.JS DEFAULTS ───────────────────────────────────────────
 Chart.defaults.font.family = "'Poppins', sans-serif";
 Chart.defaults.color = '#64748b';
 Chart.register(ChartDataLabels);
 
-// ── CLUSTER META ────────────────────────────────────────────────
 const CLUSTER_META = {
   0: {
     label: 'Klaster 0 – Wilayah Maju',
@@ -49,14 +40,10 @@ const charts = { tpak: null, tpt: null, upah: null, pasar: null, radar: null };
 let leafletMap = null;
 let globalPage2 = null;
 let selectedWilayah = 'Jawa Tengah';
-let selectedLayer = null;   // currently highlighted Leaflet layer
-let geojsonLayer = null;   // full L.geoJSON layer reference
+let selectedLayer = null;
+let geojsonLayer = null;
 
-/* ================================================================
-   INIT
-   ================================================================ */
 function initDashboard() {
-  // Hanya ambil data.json karena data klaster sudah ada di dalamnya
   fetch('data.json')
     .then(r => {
       if (!r.ok) throw new Error('Gagal mengambil data.json (HTTP ' + r.status + ')');
@@ -66,8 +53,7 @@ function initDashboard() {
       globalPage2 = data.page2;
       buildLayout();
       renderAll(data.page2, 'Jawa Tengah');
-
-      // Ambil data kluster langsung dari data.json untuk peta
+      
       initMap(data.page2.kluster);
     })
     .catch(err => {
@@ -82,9 +68,6 @@ function initDashboard() {
     });
 }
 
-/* ================================================================
-   MAP SELECTION RESET  (called by inline onclick in HTML)
-   ================================================================ */
 function resetMapSelection() {
   selectedWilayah = 'Jawa Tengah';
   document.getElementById('selectedRegionBadge').textContent = 'Jawa Tengah (Provinsi)';
@@ -97,9 +80,6 @@ function resetMapSelection() {
   renderAll(globalPage2, 'Jawa Tengah');
 }
 
-/* ================================================================
-   BUILD LAYOUT
-   ================================================================ */
 function buildLayout() {
   document.getElementById('loadingSpinner').remove();
 
@@ -214,7 +194,6 @@ function buildLayout() {
     </div>
   `;
 
-  // Radio event for pasar chart
   document.querySelectorAll('input[name="pasar"]').forEach(r => {
     r.addEventListener('change', () => {
       if (!globalPage2) return;
@@ -224,9 +203,6 @@ function buildLayout() {
   });
 }
 
-/* ================================================================
-   RENDER ALL
-   ================================================================ */
 function renderAll(page2, wilayah) {
   const trenItem = page2.tren.find(t => t.kabupaten === wilayah);
   const kabItem = page2.kabupaten.find(k => k.nama === wilayah);
@@ -253,9 +229,6 @@ function renderAll(page2, wilayah) {
   }
 }
 
-/* ================================================================
-   INSIGHT  (template format)
-   ================================================================ */
 function updateInsight(tren, kab, kluster, wilayah) {
   const latest = tren.data[tren.data.length - 1];
   const earliest = tren.data[0];
@@ -285,9 +258,6 @@ function updateInsight(tren, kab, kluster, wilayah) {
     klInfo;
 }
 
-/* ================================================================
-   CHART 1a – TREN TPAK
-   ================================================================ */
 function renderChartTPAK(trenItem) {
   if (charts.tpak) { charts.tpak.destroy(); charts.tpak = null; }
   const ctx = document.getElementById('chartTPAK').getContext('2d');
@@ -325,9 +295,6 @@ function renderChartTPAK(trenItem) {
   });
 }
 
-/* ================================================================
-   CHART 1b – TREN TPT
-   ================================================================ */
 function renderChartTPT(trenItem) {
   if (charts.tpt) { charts.tpt.destroy(); charts.tpt = null; }
   const ctx = document.getElementById('chartTPT').getContext('2d');
@@ -365,9 +332,6 @@ function renderChartTPT(trenItem) {
   });
 }
 
-/* ================================================================
-   CHART 2 – UPAH FORMAL vs INFORMAL (BAR)
-   ================================================================ */
 function renderChartUpah(kabItem, wilayah, page2) {
   if (charts.upah) { charts.upah.destroy(); charts.upah = null; }
 
@@ -474,9 +438,6 @@ function renderChartUpah(kabItem, wilayah, page2) {
   });
 }
 
-/* ================================================================
-   CHART 3 – PASAR KERJA (DOUGHNUT) + STAT BOX
-   ================================================================ */
 function renderChartPasar(kabItem, mode) {
   if (charts.pasar) { charts.pasar.destroy(); charts.pasar = null; }
 
@@ -542,9 +503,6 @@ function renderChartPasar(kabItem, mode) {
   });
 }
 
-/* ================================================================
-   KLASTER CARD
-   ================================================================ */
 function renderKlasterCard(klusterItem, allKluster) {
   const c = klusterItem.cluster;
   const meta = CLUSTER_META[c];
@@ -603,9 +561,6 @@ function renderKlasterCard(klusterItem, allKluster) {
     </div>`;
 }
 
-/* ================================================================
-   CHART 4 – RADAR (enhanced explanation sidebar)
-   ================================================================ */
 function renderChartRadar(klusterItem, allKluster) {
   if (charts.radar) { charts.radar.destroy(); charts.radar = null; }
 
@@ -697,7 +652,6 @@ function renderChartRadar(klusterItem, allKluster) {
     },
   });
 
-  // ── Enhanced sidebar ──
   const RADAR_DIMS = [
     {
       label: 'Penduduk 2024',
@@ -830,9 +784,6 @@ function renderChartRadar(klusterItem, allKluster) {
     </div>`;
 }
 
-/* ================================================================
-   MAP – CHOROPLETH + CLICK FILTER (Leaflet.js)
-   ================================================================ */
 function initMap(klusterData) {
   const clusterLookup = {};
   klusterData.forEach(k => {
@@ -862,7 +813,6 @@ function initMap(klusterData) {
   renderMapLegend();
 }
 
-/* ── Name matching helpers ──────────────────────────────── */
 function normName(str) {
   if (!str) return '';
   return str.toLowerCase().replace(/^kab\.\s*/i, '').replace(/^kabupaten\s*/i, '').trim();
@@ -891,7 +841,6 @@ function findCluster(feature, lookup) {
   return null;
 }
 
-/* ── Render choropleth with click interactivity ────────── */
 function renderChoropleth(geojson, klusterData, clusterLookup) {
   geojsonLayer = L.geoJSON(geojson, {
     style: feature => {
@@ -910,7 +859,6 @@ function renderChoropleth(geojson, klusterData, clusterLookup) {
       let center = layer.getBounds().getCenter();
       const shortName = displayName.replace('Kabupaten ', '').replace('Kota ', '');
 
-      // Manual overrides for tricky shapes
       if (displayName.includes('Cilacap')) {
         center = [center.lat + 0.05, center.lng - 0.2];
       } else if (displayName.includes('Jepara')) {
@@ -963,25 +911,18 @@ function renderChoropleth(geojson, klusterData, clusterLookup) {
           if (e.target !== selectedLayer) geojsonLayer.resetStyle(e.target);
         },
         click: e => {
-          if (!item) return;   // skip water bodies
-
-          // Reset previous selection
+          if (!item) return;
           if (selectedLayer && selectedLayer !== e.target) geojsonLayer.resetStyle(selectedLayer);
 
-          // Highlight selected polygon
           e.target.setStyle({ weight: 3.5, color: '#1e293b', fillOpacity: 0.95 });
           e.target.bringToFront();
           selectedLayer = e.target;
           selectedWilayah = displayName;
 
-          // Update badge & reset button
           document.getElementById('selectedRegionBadge').textContent = displayName;
           document.getElementById('resetMapBtn').style.display = 'inline-flex';
-
-          // Fly to region
           leafletMap.flyToBounds(layer.getBounds(), { maxZoom: 11, padding: [36, 36], duration: 0.9 });
 
-          // Update all charts
           renderAll(globalPage2, displayName);
         },
       });
@@ -1018,7 +959,4 @@ function showMapPlaceholder() {
     </div>`;
 }
 
-/* ================================================================
-   AUTO-START
-   ================================================================ */
 document.addEventListener('DOMContentLoaded', initDashboard);
