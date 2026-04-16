@@ -906,6 +906,31 @@ function renderChoropleth(geojson, klusterData, clusterLookup) {
       const cd = item?.cluster_data;
       const meta = item ? CLUSTER_META[item.cluster] : null;
 
+      // ── Map Labels ──
+      let center = layer.getBounds().getCenter();
+      const shortName = displayName.replace('Kabupaten ', '').replace('Kota ', '');
+
+      // Manual overrides for tricky shapes
+      if (displayName.includes('Cilacap')) {
+        center = [center.lat + 0.05, center.lng - 0.2];
+      } else if (displayName.includes('Jepara')) {
+        center = [center.lat - 0.35, center.lng + 0.2];
+      } else if (displayName.includes('Brebes')) {
+        center = [center.lat - 0.05, center.lng - 0.05];
+      } else if (displayName.includes('Karanganyar')) {
+        center = [center.lat - 0.05, center.lng + 0.1];
+      }
+
+      L.marker(center, {
+        icon: L.divIcon({
+          className: 'map-district-label',
+          html: `<span>${shortName}</span>`,
+          iconSize: [60, 20],
+          iconAnchor: [30, 10]
+        }),
+        interactive: false
+      }).addTo(leafletMap);
+
       const tip = `
         <div style="font-family:'Poppins',sans-serif;min-width:260px;padding:2px">
           <div style="font-weight:700;color:#1F3C88;font-size:.9rem;margin-bottom:2px">${displayName}</div>

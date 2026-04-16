@@ -84,8 +84,11 @@ nav {
 
 /* ── HERO ── */
 .hero {
-  background: linear-gradient(135deg, #1F3C88 0%, #2563eb 60%, #1e40af 100%);
-  padding: 7.5rem 2.5rem 6rem;
+  background: 
+    radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, .35) 0%, transparent 60%),
+    radial-gradient(ellipse at 10% 80%, rgba(249, 115, 22, .18) 0%, transparent 50%),
+    linear-gradient(135deg, #1F3C88 0%, #2563eb 60%, #1e40af 100%);
+  padding: 7.5rem 2.5rem 6.5rem;
   position: relative;
   overflow: hidden;
 }
@@ -94,9 +97,10 @@ nav {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, .35) 0%, transparent 60%),
-    radial-gradient(ellipse at 10% 80%, rgba(249, 115, 22, .18) 0%, transparent 50%);
+  background: url('../assets/images/contoh.jpeg') center/cover no-repeat;
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
 
 .hero-inner {
@@ -487,6 +491,29 @@ main {
   padding: .6rem .85rem !important;
   font-family: 'Poppins', sans-serif !important;
   font-size: .78rem !important;
+}
+
+/* Map District Labels */
+.map-district-label {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  text-align: center;
+}
+
+.map-district-label span {
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(31, 60, 136, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 
+    -1px -1px 0 #fff,  
+     1px -1px 0 #fff,
+    -1px  1px 0 #fff,
+     1px  1px 0 #fff; /* Outline for readability */
 }
 
 /* ── SPINNER ── */
