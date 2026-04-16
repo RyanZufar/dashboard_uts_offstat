@@ -49,16 +49,12 @@ nav {
   backdrop-filter: none;
 }
 
-.In-class {
+.nav-brand span {
   color: #fff;
   font-weight: 700;
   font-size: 1.5rem;
   letter-spacing: .03em;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-}
-
-.In-class .Sora-class {
-  color:#60a5fa;
 }
 
 .nav-links {
