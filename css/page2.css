@@ -84,7 +84,7 @@ nav {
 
 /* ── HERO ── */
 .hero {
-  background: 
+  background:
     radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, .35) 0%, transparent 60%),
     radial-gradient(ellipse at 10% 80%, rgba(249, 115, 22, .18) 0%, transparent 50%),
     linear-gradient(135deg, #1F3C88 0%, #2563eb 60%, #1e40af 100%);
@@ -97,7 +97,7 @@ nav {
   content: '';
   position: absolute;
   inset: 0;
-  background: url('../assets/images/contoh.jpeg') center/cover no-repeat;
+  background: url('../assets/images/batik.png') center/cover no-repeat;
   opacity: 0.12;
   mix-blend-mode: overlay;
   pointer-events: none;
@@ -371,22 +371,26 @@ main {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .65rem;
 }
 
 .kpi-item {
   background: var(--bg);
   border-radius: .7rem;
-  padding: .75rem .9rem;
+  padding: .75rem .6rem;
 }
 
 .kpi-item .kpi-label {
-  font-size: .68rem;
+  font-size: .62rem;
+  letter-spacing: .04em;
   text-transform: uppercase;
-  letter-spacing: .06em;
   color: var(--grey);
   margin-bottom: .2rem;
+
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
 }
 
 .kpi-item .kpi-value {
@@ -509,11 +513,12 @@ main {
   letter-spacing: 0.02em;
   white-space: nowrap;
   pointer-events: none;
-  text-shadow: 
-    -1px -1px 0 #fff,  
-     1px -1px 0 #fff,
-    -1px  1px 0 #fff,
-     1px  1px 0 #fff; /* Outline for readability */
+  text-shadow:
+    -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px 1px 0 #fff;
+  /* Outline for readability */
 }
 
 /* ── SPINNER ── */

@@ -110,7 +110,7 @@ function buildLayout() {
     <div class="grid-full">
       <div class="card map-card" style="min-height:500px;">
         <div class="card-header" style="justify-content:center;flex-direction:column;gap:.5rem;align-items:center">
-          <h3>Peta Klaster Produktivitas Kabupaten/Kota Jawa Tengah</h3>
+          <h3>Peta Klaster Produktivitas Kabupaten/Kota Jawa Tengah Tahun 2024</h3>
           <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center">
             <span id="selectedRegionBadge" class="region-badge">Jawa Tengah (Provinsi)</span>
             <button id="resetMapBtn" class="reset-map-btn" style="display:none"
@@ -146,13 +146,13 @@ function buildLayout() {
     <div class="grid-2">
       <div class="card">
         <div class="card-header" style="justify-content:center">
-          <h3>Tren TPAK (2017–2025)</h3>
+          <h3>Tren Tingkat Partisipasi Angkatan Kerja (2017–2025)</h3>
         </div>
         <div class="chart-wrap h-72"><canvas id="chartTPAK"></canvas></div>
       </div>
       <div class="card">
         <div class="card-header" style="justify-content:center">
-          <h3>Tren TPT (2017–2025)</h3>
+          <h3>Tren Tingkat Pengangguran Terbuka (2017–2025)</h3>
         </div>
         <div class="chart-wrap h-72"><canvas id="chartTPT"></canvas></div>
       </div>
@@ -162,14 +162,14 @@ function buildLayout() {
     <div class="grid-2">
       <div class="card">
         <div class="card-header" style="justify-content:center">
-          <h3>Perbandingan Upah Formal dan Informal</h3>
+          <h3>Perbandingan Upah Formal dan Informal Tahun 2024</h3>
         </div>
         <div class="chart-wrap h-72"><canvas id="chartUpah"></canvas></div>
         <div id="upahStatBox" class="pasar-stat-box"></div>
       </div>
       <div class="card">
         <div class="card-header">
-          <h3>Proporsi Gender Pasar Kerja</h3>
+          <h3>Proporsi Gender Pasar Kerja Tahun 2024</h3>
           <div class="radio-group" id="radioGroup">
             <label><input type="radio" name="pasar" value="lowongan" id="r-lowongan" checked>Lowongan Kerja</label>
             <label><input type="radio" name="pasar" value="pencari"  id="r-pencari">Pencari Kerja</label>
@@ -700,7 +700,7 @@ function renderChartRadar(klusterItem, allKluster) {
   // ── Enhanced sidebar ──
   const RADAR_DIMS = [
     {
-      label: 'Penduduk',
+      label: 'Penduduk 2024',
       fullLabel: 'Jumlah Penduduk',
       value: (cd.penduduk >= 1000000 ? parseFloat((cd.penduduk / 1000000).toFixed(2)) + ' Juta' : fNum(cd.penduduk)),
       avg: (avg.penduduk >= 1000000 ? parseFloat((avg.penduduk / 1000000).toFixed(2)) + ' Juta' : fNum(Math.round(avg.penduduk))),
@@ -710,7 +710,7 @@ function renderChartRadar(klusterItem, allKluster) {
       invertGoodBad: false,
     },
     {
-      label: 'Bukan Angkatan Kerja',
+      label: 'Bukan Angkatan Kerja 2024',
       fullLabel: 'Penduduk Bukan Angkatan Kerja',
       value: (cd.penduduk_bukan_bekerja >= 1000000 ? parseFloat((cd.penduduk_bukan_bekerja / 1000000).toFixed(2)) + ' Juta' : fNum(cd.penduduk_bukan_bekerja)),
       avg: (avg.pbb >= 1000000 ? parseFloat((avg.pbb / 1000000).toFixed(2)) + ' Juta' : fNum(Math.round(avg.pbb))),
@@ -720,7 +720,7 @@ function renderChartRadar(klusterItem, allKluster) {
       invertGoodBad: true,
     },
     {
-      label: 'TPT',
+      label: 'TPT 2024',
       fullLabel: 'Tingkat Pengangguran Terbuka',
       value: cd.tpt + '%',
       avg: avg.tpt.toFixed(2) + '%',
@@ -730,7 +730,7 @@ function renderChartRadar(klusterItem, allKluster) {
       invertGoodBad: true,
     },
     {
-      label: 'TKK',
+      label: 'TKK 2024',
       fullLabel: 'Tingkat Kesempatan Kerja',
       value: cd.tkk + '%',
       avg: avg.tkk.toFixed(2) + '%',
@@ -740,8 +740,8 @@ function renderChartRadar(klusterItem, allKluster) {
       invertGoodBad: false,
     },
     {
-      label: 'TPAK',
-      fullLabel: 'Partisipasi Angkatan Kerja',
+      label: 'TPAK 2024',
+      fullLabel: 'Tingkat Partisipasi Angkatan Kerja',
       value: cd.tpak + '%',
       avg: avg.tpak.toFixed(2) + '%',
       score: values[4],
@@ -750,7 +750,7 @@ function renderChartRadar(klusterItem, allKluster) {
       invertGoodBad: false,
     },
     {
-      label: 'IPM',
+      label: 'IPM 2024',
       fullLabel: 'Indeks Pembangunan Manusia',
       value: String(cd.ipm),
       avg: avg.ipm.toFixed(2),
@@ -760,7 +760,7 @@ function renderChartRadar(klusterItem, allKluster) {
       invertGoodBad: false,
     },
     {
-      label: 'Pengeluaran/Kapita',
+      label: 'Pengeluaran/Kapita 2024',
       fullLabel: 'Daya Beli Masyarakat',
       value: fRupiah(cd.pengeluaran_per_kapita),
       avg: fRupiah(Math.round(avg.pengeluaran)),
@@ -770,7 +770,7 @@ function renderChartRadar(klusterItem, allKluster) {
       invertGoodBad: false,
     },
     {
-      label: 'Upah Rata-rata',
+      label: 'Upah Rata-rata 2024',
       fullLabel: 'Tingkat Upah Wilayah',
       value: fRupiah(cd.rata_upah),
       avg: fRupiah(Math.round(avg.upah)),
