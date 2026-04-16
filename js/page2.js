@@ -439,22 +439,17 @@ function renderChartUpah(kabItem, wilayah, page2) {
 }
 
 function renderChartPasar(kabItem, mode) {
-  if (charts.pasar) { charts.pasar.destroy(); charts.pasar = null; }
-
   const lk = mode === 'lowongan'
     ? kabItem.lowongan_kerja.laki_laki : kabItem.pencari_kerja.laki_laki;
   const pr = mode === 'lowongan'
     ? kabItem.lowongan_kerja.perempuan : kabItem.pencari_kerja.perempuan;
 
-  const total = lk + pr;
-  const lkPct = lk / total * 100;
-  const prPct = pr / total * 100;
-  const diffPct = (Math.abs(lk - pr) / total * 100).toFixed(1);
+  const total    = lk + pr;
+  const diffPct  = (Math.abs(lk - pr) / total * 100).toFixed(1);
   const dominant = lk > pr ? 'Laki-laki' : 'Perempuan';
   const minority = lk > pr ? 'Perempuan' : 'Laki-laki';
   const domColor = lk > pr ? '#1F3C88' : '#F97316';
-  const modeLabel = mode === 'lowongan' ? 'Lowongan Kerja Terdaftar' : 'Pencari Kerja Terdaftar';
-
+  const modeLabel= mode === 'lowongan' ? 'Lowongan Kerja Terdaftar' : 'Pencari Kerja Terdaftar';
   const statBox = document.getElementById('pasarStatBox');
   if (statBox) {
     statBox.innerHTML = `
@@ -473,34 +468,43 @@ function renderChartPasar(kabItem, mode) {
       </div>`;
   }
 
-  const ctx = document.getElementById('chartPasar').getContext('2d');
-  charts.pasar = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Laki-laki', 'Perempuan'],
-      datasets: [{
-        data: [lk, pr],
-        backgroundColor: ['#1F3C88', '#F97316'],
-        borderWidth: 0, hoverOffset: 8,
-      }],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '50%',
-      plugins: {
-        datalabels: {
-          color: '#fff', font: { weight: 'bold', size: 12 },
-          formatter: v => `${(v / total * 100).toFixed(1)}%`,
-        },
-        title: {
-          display: true, text: modeLabel,
-          color: '#1e293b', font: { size: 12, weight: '600' }, padding: { bottom: 6 },
-        },
-        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
-        tooltip: { callbacks: { label: c => `${fNum(c.raw)} orang` } },
+  if (charts.pasar) {
+    charts.pasar.data.datasets[0].data = [lk, pr];
+    charts.pasar.options.plugins.title.text = modeLabel;
+    charts.pasar.update();
+  } else {
+    const ctx = document.getElementById('chartPasar').getContext('2d');
+    charts.pasar = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Laki-laki', 'Perempuan'],
+        datasets: [{
+          data: [lk, pr],
+          backgroundColor: ['#1F3C88', '#F97316'],
+          borderWidth: 0, hoverOffset: 8,
+        }],
       },
-    },
-  });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '50%',
+        animation: {
+          delay: 1500
+        },
+        plugins: {
+          datalabels: {
+            color: '#fff', font: { weight: 'bold', size: 12 },
+            formatter: v => `${(v / total * 100).toFixed(1)}%`,
+          },
+          title: {
+            display: true, text: modeLabel,
+            color: '#1e293b', font: { size: 12, weight: '600' }, padding: { bottom: 6 },
+          },
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+          tooltip: { callbacks: { label: c => `${fNum(c.raw)} orang` } },
+        },
+      },
+    });
+  }
 }
 
 function renderKlasterCard(klusterItem, allKluster) {
