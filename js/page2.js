@@ -679,7 +679,7 @@ function renderChartRadar(klusterItem, allKluster) {
       value: cd.tpt + '%',
       avg: avg.tpt.toFixed(2) + '%',
       score: values[2],
-      color: '#F97316',
+      color: '#1F3C88',
       desc: 'Persentase pengangguran murni terhadap total angkatan kerja.',
       invertGoodBad: true,
     },
@@ -709,7 +709,7 @@ function renderChartRadar(klusterItem, allKluster) {
       value: String(cd.ipm),
       avg: avg.ipm.toFixed(2),
       score: values[5],
-      color: '#3B82F6',
+      color: '#1F3C88',
       desc: 'Indeks komposit: harapan hidup, pendidikan, dan standar hidup.',
       invertGoodBad: false,
     },
@@ -729,7 +729,7 @@ function renderChartRadar(klusterItem, allKluster) {
       value: fRupiah(cd.rata_upah),
       avg: fRupiah(Math.round(avg.upah)),
       score: values[7],
-      color: '#F97316',
+      color: '#1F3C88',
       desc: 'Rata-rata upah seluruh sektor (formal + informal) di wilayah ini.',
       invertGoodBad: false,
     },
@@ -743,13 +743,19 @@ function renderChartRadar(klusterItem, allKluster) {
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1rem;">
       ${RADAR_DIMS.map(d => {
     const above = d.score >= 100;
+    
+    const isGoodStatus = d.invertGoodBad ? !above : above; 
     let badgeColor, badgeBg, badgeText;
     if (above) {
       badgeText = '▲ Di atas rata-rata';
+    } else {
+      badgeText = '▼ Di bawah rata-rata';
+    }
+
+    if (isGoodStatus) {
       badgeColor = '#1F3C88';
       badgeBg = '#eff6ff';
     } else {
-      badgeText = '▼ Di bawah rata-rata';
       badgeColor = '#F97316';
       badgeBg = '#fff7ed';
     }
